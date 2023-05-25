@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html><!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Book Management</title>
+  <!--    <style>-->
+  <!--        &lt;!&ndash;-->
+  <!--            @import url("css/style.css");-->
+  <!--        &ndash;&gt;-->
+  <!--    </style>-->
+</head>
+<body>
+<h1>Update Book</h1>
+<h3>{{.error}}</h3>
+<form action="/updateBook" method="post">
+  <input type="hidden" name="id" value="{{.id}}">
+  Title: <input type="text" name="title" required value="{{.book.Title}}"><br>
+  Author: <input type="text" name="author" required value="{{.book.Author}}"><br>
+  Genre: <input type="text" name="genre" required value="{{.book.Genre}}"><br>
+  Description: <input type="text" name="description" required value="{{.book.Description}}"><br>
+  ISBN: <input type="number" name="isbn" required value="{{.book.ISBN}}"><br>
+  Total Quantity: <input type="number" name="total_quantity" required value="{{.book.TotalQuantity}}"><br>
+  Actual Quantity: <input type="number" name="actual_quantity" required value="{{.book.ActualQuantity}}"><br>
+  <input type="submit" value="Submit">
+</form>
+<br><br>
+</body>
+</html>

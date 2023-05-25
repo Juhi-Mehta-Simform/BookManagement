@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Book Management</title>
+    <!--    <style>-->
+    <!--        &lt;!&ndash;-->
+    <!--            @import url("css/style.css");-->
+    <!--        &ndash;&gt;-->
+    <!--    </style>-->
+</head>
+<body>
+<h1>View Book</h1>
+{{range .book}}
+ID: <span>{{.ID}}</span><br>
+Title: <span>{{.Title}}</span><br>
+Author: <span>{{.Author}}</span><br>
+Genre: <span>{{.Genre}}</span><br>
+Description: <span>{{.Description}}</span><br>
+ISBN: <span>{{.ISBN}}</span><br>
+Available Quantity: <span>{{.ActualQuantity}}</span><br><br>
+<a href="/addBook">Add</a>&nbsp; &nbsp;
+<a href="/loadBook/{{.ID}}">Update</a>&nbsp; &nbsp;
+<a href="/loadDelete/{{.ID}}">Delete</a>&nbsp; &nbsp;
+<p>-----------------------------------------------------------------</p>
+{{end}}
+<a href="/logout">Logout</a>
+</body>
+</html>

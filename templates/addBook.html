@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Book Management</title>
+    <!--    <style>-->
+    <!--        &lt;!&ndash;-->
+    <!--            @import url("css/style.css");-->
+    <!--        &ndash;&gt;-->
+    <!--    </style>-->
+</head>
+<body>
+<h1>Add Book</h1>
+<h3>{{.error}}</h3>
+<form action="/addBook" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="id"><br>
+    Title: <input type="text" name="title" required><br>
+    Author: <input type="text" name="author" required><br>
+    Genre: <input type="text" name="genre" required><br>
+    Description: <input type="text" name="description" required><br>
+    ISBN: <input type="number" name="isbn" required><br>
+    Total Quantity: <input type="number" name="total_quantity" required><br>
+    Actual Quantity: <input type="number" name="actual_quantity" required><br>
+    <input type="submit" value="Submit">
+</form>
+<br><br>
+</body>
+</html>

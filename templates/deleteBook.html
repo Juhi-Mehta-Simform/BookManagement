@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html><!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Book Management</title>
+    <!--    <style>-->
+    <!--        &lt;!&ndash;-->
+    <!--            @import url("css/style.css");-->
+    <!--        &ndash;&gt;-->
+    <!--    </style>-->
+</head>
+<body>
+<h1>Delete Book</h1>
+<h3>{{.error}}</h3>
+<form action="/deleteBook" method="post">
+    <input type="hidden" name="id" value="{{.id}}">
+    <p>Do you want to delete?</p>
+    <input type="submit" value="Yes">
+</form>
+<br><br>
+</body>
+</html>
