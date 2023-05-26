@@ -188,7 +188,6 @@ func LoadReturn(ctx *gin.Context) {
 	if session.Get("userID") != nil {
 		id := session.Get("userID").(int)
 		connection.GetConnection().Where("member_id=?", id).Find(&borrow)
-		fmt.Println(borrow.IssueDate)
 		ctx.HTML(http.StatusOK, "returnBook.html", gin.H{
 			"member_id": id,
 			"borrow":    borrow,
@@ -206,7 +205,6 @@ func ReturnBook(ctx *gin.Context) {
 		connection.GetConnection().Where("isbn=?", borrow.BookISBN).Find(&book)
 		borrow.MemberID = session.Get("userID").(int)
 		borrow.BookISBN = ctx.PostForm("book_isbn")
-		borrow.IssueDate, _ = time.Parse("2006-01-02", ctx.PostForm("issue_date"))
 		borrow.DueDate, _ = time.Parse("2006-01-02", ctx.PostForm("due_date"))
 		borrow.Status = ctx.PostForm("status")
 		db := connection.GetConnection().Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", borrow.MemberID, borrow.BookISBN).Find(&borrow)
@@ -214,7 +212,6 @@ func ReturnBook(ctx *gin.Context) {
 			connection.GetConnection().Where("isbn=?", borrow.BookISBN).Find(&book)
 			newQuantity := book.ActualQuantity + 1
 			connection.GetConnection().Model(&models.Book{}).Where("isbn=?", borrow.BookISBN).Update("actual_quantity", newQuantity)
-			connection.GetConnection().Model(&models.Borrow{}).Where("isbn=?", borrow.BookISBN).Update("status", "returned")
 			ctx.Redirect(http.StatusFound, "/viewBook")
 		} else {
 			ctx.JSON(http.StatusForbidden, "not ok")
