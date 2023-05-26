@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Book Management</title>
+  <!--    <style>-->
+  <!--        &lt;!&ndash;-->
+  <!--            @import url("css/style.css");-->
+  <!--        &ndash;&gt;-->
+  <!--    </style>-->
+</head>
+<body>
+<h1>View Borrowed Books</h1>
+
+<h3>{{.error}}</h3>
+{{range .borrow}}
+ISBN: <span>{{.BookISBN}}</span><br>
+Status: <span>{{.Status}}</span><br>
+IssueDate: <span>{{.IssueDate}}</span><br>
+DueDate: <span>{{.DueDate}}</span><br>
+<p>-----------------------------------------------------------------</p>
+{{end}}
+<a href="/viewBook">View all books</a>
+</body>
+</html>

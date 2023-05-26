@@ -25,5 +25,10 @@ func init() {
 	Server.GET("/viewBook", controller.ViewBook)
 	Server.GET("/loadBook/:id", controller.LoadUpdate)
 	Server.POST("/updateBook", controller.UpdateBook)
-	Server.GET("/loadDelete/:id", controller.LoadDelete)
+	Server.GET("/loadDelete/:id", controller.DeleteBook)
+	Server.GET("/loadBorrow/:id", controller.LoadBorrow)
+	Server.POST("/borrowBook", controller.BorrowBook)
+	Server.GET("/viewBorrow", controller.ViewBorrow)
+	Server.GET("/userBorrow", controller.UserBorrow)
+	Server.GET("/loadReturn/:id", controller.LoadReturn)
 }

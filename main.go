@@ -8,8 +8,8 @@ import (
 
 func main() {
 	db := connection.GetConnection()
-	db.AutoMigrate(&models.User{}, &models.Book{})
+	//db.Migrator().DropTable(&models.User{}, &models.Borrow{}, &models.Book{})
+	db.AutoMigrate(&models.User{}, &models.Book{}, &models.Borrow{})
 	defer connection.CloseConnection(db)
-
 	router.Server.Run()
 }

@@ -11,6 +11,8 @@
 </head>
 <body>
 <h1>View Book</h1>
+
+<h3>{{.error}}</h3>
 {{range .book}}
 ID: <span>{{.ID}}</span><br>
 Title: <span>{{.Title}}</span><br>
@@ -19,11 +21,15 @@ Genre: <span>{{.Genre}}</span><br>
 Description: <span>{{.Description}}</span><br>
 ISBN: <span>{{.ISBN}}</span><br>
 Available Quantity: <span>{{.ActualQuantity}}</span><br><br>
-<a href="/addBook">Add</a>&nbsp; &nbsp;
 <a href="/loadBook/{{.ID}}">Update</a>&nbsp; &nbsp;
 <a href="/loadDelete/{{.ID}}">Delete</a>&nbsp; &nbsp;
+<a href="/loadBorrow/{{.ID}}">Borrow</a><br>
+<a href="/loadReturn/{{.ID}}">Return</a><br>
 <p>-----------------------------------------------------------------</p>
 {{end}}
+<a href="/addBook">Add</a><br>
+<a href="/viewBorrow">View all borrows</a><br>
+<a href="/userBorrow">Borrow history</a><br>
 <a href="/logout">Logout</a>
 </body>
 </html>

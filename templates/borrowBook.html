@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Book Management</title>
+  <!--    <style>-->
+  <!--        &lt;!&ndash;-->
+  <!--            @import url("css/style.css");-->
+  <!--        &ndash;&gt;-->
+  <!--    </style>-->
+</head>
+<body>
+<h1>Borrow Book</h1>
+<form action="/borrowBook" method="post">
+  <input type="hidden" name="id" value="{{.id}}">
+  <input type="hidden" name="status" value="pending">
+  ISBN: <input type="number" name="book_isbn" required value="{{.book.ISBN}}"><br>
+  IssueDate: <input type="date" id="date" name="issue_date" readonly><br>
+  ReturnDate: <input type="date" id="further" name="due_date" readonly><br>
+  <input type="submit" value="Submit">
+</form>
+<br><br>
+</body>
+
+<script>
+    var today = new Date();
+    var futureDate = new Date(today.getTime() + (15 * 24 * 60 * 60 * 1000));
+    var Date = today.toISOString().split('T')[0];
+    document.getElementById('date').value = Date;
+    var formattedDate = futureDate.toISOString().split('T')[0];
+    document.getElementById('further').value = formattedDate;
+</script>
+</html>
