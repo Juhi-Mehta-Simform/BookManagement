@@ -19,6 +19,7 @@ func LoadLogin(ctx *gin.Context) {
 
 func Signup(ctx *gin.Context) {
 	var user models.User
+	user.RoleName = ctx.PostForm("role_name")
 	user.Name = ctx.PostForm("name")
 	user.Email = ctx.PostForm("email")
 	user.Password = ctx.PostForm("password")
@@ -49,7 +50,7 @@ func Login(ctx *gin.Context) {
 		} else {
 			session.Set("userID", user.UserID)
 			session.Save()
-			ctx.Redirect(http.StatusFound, "/viewBook")
+			ctx.Redirect(http.StatusFound, "/home")
 		}
 	} else {
 		ctx.HTML(http.StatusBadRequest, "login.html", gin.H{

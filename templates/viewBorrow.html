@@ -13,12 +13,30 @@
 <h1>View Borrowed Books</h1>
 
 <h3>{{.error}}</h3>
-{{range .borrow}}
-ISBN: <span>{{.BookISBN}}</span><br>
-Status: <span>{{.Status}}</span><br>
-IssueDate: <span>{{.IssueDate}}</span><br>
-DueDate: <span>{{.DueDate}}</span><br>
-<p>-----------------------------------------------------------------</p>
+{{if eq .user.RoleName "Member"}}
+  {{range .borrow}}
+    ISBN: <span>{{.BookISBN}}</span><br>
+    Status: <span>{{.Status}}</span><br>
+    IssueDate: <span>{{.IssueDate}}</span><br>
+    DueDate: <span>{{.DueDate}}</span><br>
+    {{if eq .Status "pending"}}
+    <a href="/loadReturn/{{.BookISBN}}">Return</a><br>
+    {{end}}
+    <p>-----------------------------------------------------------------</p>
+  {{end}}
+{{end}}
+{{if eq .user.RoleName "Librarian"}}
+      {{range .borrow}}
+          MemberID: <span>{{.MemberID}}</span><br>
+          ISBN: <span>{{.BookISBN}}</span><br>
+          Status: <span>{{.Status}}</span><br>
+          IssueDate: <span>{{.IssueDate}}</span><br>
+          DueDate: <span>{{.DueDate}}</span><br>
+          {{if eq .Status "requested"}}
+            <a href="/returnRequest/{{.MemberID}}/{{.BookISBN}}">Accept Return Request</a><br>
+          {{end}}
+          <p>-----------------------------------------------------------------</p>
+      {{end}}
 {{end}}
 <a href="/viewBook">View all books</a>
 </body>

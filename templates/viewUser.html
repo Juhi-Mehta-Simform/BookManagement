@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Book Management</title>
+    <!--    <style>-->
+    <!--        &lt;!&ndash;-->
+    <!--            @import url("css/style.css");-->
+    <!--        &ndash;&gt;-->
+    <!--    </style>-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>View Users</h1>
+<h3>{{.error}}</h3>
+<form action="/search" method="POST">
+    <input type="text" id="searchInput" name="query" placeholder="Search Here">
+</form><br><br>
+<div id="card">
+{{range .users}}
+    {{if ne .RoleName "Admin"}}
+        UserID: <span>{{.UserID}}</span><br>
+        Name: <span>{{.Name}}</span><br>
+        Email: <span>{{.Email}}</span><br>
+        Role: <span>{{.RoleName}}</span><br><br>
+        {{if eq .RoleName "Member"}}
+            <a href="/makeLibrarian/{{.UserID}}">Make Librarian</a>&nbsp;&nbsp;
+            <a href="#">Make Admin</a>
+        {{else}}
+            <a href="#">Make Admin</a>
+        {{end}}
+        <p>-----------------------------------------------------------------</p>
+    {{end}}
+{{end}}
+<a href="/home">Home</a>
+</div>
+</body>
+<script>
+    $(document).ready(function() {
+        searchInput = $("#searchInput")
+        searchInput.on('input' , async function(){
+            var lower = searchInput.val()
+
+            console.log(lower)
+            const response = await fetch('http://localhost:8080/search?query='+lower, {
+                method: "POST",
+            });
+            const data = await response.json();
+            console.log(await data);
+            $("#card").empty()
+            data.forEach(function (name) {
+                if(name["role_name"]!="Admin") {
+                    $("#card").append("UserID: " + "<span>" + name["user_id"] + "</span>" + "<br>" + "Name: " + "<span>" + name["name"] + "</span>" + "<br>" + "Email: " + "<span>" + name["email"] + "</span>" + "<br>" + "Role: " + "<span>" + name["role_name"] + "</span>" + "<br>" + "<br>")
+                    if (name["role_name"] == "Member") {
+                        $("#card").append("<a href='/makeLibrarian/" + name["role_name"] + "'>" + "Make Librarian" + "</a>" + "&nbsp;" + "&nbsp;")
+                        $("#card").append("<a href='#'>" + "Make Admin" + "</a>")} else if (name["role_name"] == "Librarian") {
+                        $("#card").append("<a href='#'>" + "Make Admin" + "<a>")
+                    }
+                       $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
+                }
+            });
+        });
+    });
+</script>
+</html>

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Book Management</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!--    <style>-->
     <!--        &lt;!&ndash;-->
     <!--            @import url("css/style.css");-->
@@ -13,23 +14,64 @@
 <h1>View Book</h1>
 
 <h3>{{.error}}</h3>
-{{range .book}}
-ID: <span>{{.ID}}</span><br>
-Title: <span>{{.Title}}</span><br>
-Author: <span>{{.Author}}</span><br>
-Genre: <span>{{.Genre}}</span><br>
-Description: <span>{{.Description}}</span><br>
-ISBN: <span>{{.ISBN}}</span><br>
-Available Quantity: <span>{{.ActualQuantity}}</span><br><br>
-<a href="/loadBook/{{.ID}}">Update</a>&nbsp; &nbsp;
-<a href="/loadDelete/{{.ID}}">Delete</a>&nbsp; &nbsp;
-<a href="/loadBorrow/{{.ID}}">Borrow</a><br>
-<a href="/loadReturn/{{.ID}}">Return</a><br>
-<p>-----------------------------------------------------------------</p>
+<form action="/searchBook" method="POST">
+    <input type="text" id="searchInput" name="query" placeholder="Search Here">
+</form><br><br>
+<div id="card">
+{{if ne .user.RoleName "Member"}}
+    {{range .book}}
+    ID: <span>{{.ID}}</span><br>
+    Title: <span>{{.Title}}</span><br>
+    Author: <span>{{.Author}}</span><br>
+    Genre: <span>{{.Genre}}</span><br>
+    Description: <span>{{.Description}}</span><br>
+    ISBN: <span>{{.ISBN}}</span><br>
+    Available Quantity: <span>{{.ActualQuantity}}</span><br><br>
+    <a href="/loadBook/{{.ID}}">Update</a>&nbsp; &nbsp;
+    <a href="/loadDelete/{{.ID}}">Delete</a>&nbsp; &nbsp;
+    <p>-----------------------------------------------------------------</p>
+    {{end}}
+    <a href="/addBook">Add a New Book</a><br>
+{{else}}
+    {{range .book}}
+    ID: <span>{{.ID}}</span><br>
+    Title: <span>{{.Title}}</span><br>
+    Author: <span>{{.Author}}</span><br>
+    Genre: <span>{{.Genre}}</span><br>
+    Description: <span>{{.Description}}</span><br>
+    ISBN: <span>{{.ISBN}}</span><br>
+    Available Quantity: <span>{{.ActualQuantity}}</span><br><br>
+    <a href="/loadBorrow/{{.ID}}">Borrow</a><br>
+    <p>-----------------------------------------------------------------</p>
+    {{end}}
 {{end}}
-<a href="/addBook">Add</a><br>
-<a href="/viewBorrow">View all borrows</a><br>
-<a href="/userBorrow">Borrow history</a><br>
-<a href="/logout">Logout</a>
+<a href="/home">Home</a>
+</div>
 </body>
+<script>
+    $(document).ready(function() {
+        searchInput = $("#searchInput")
+        searchInput.on('input' , async function(){
+            var lower = searchInput.val()
+            console.log(lower)
+            const response = await fetch('http://localhost:8080/searchBook?query='+lower, {
+                method: "POST",
+            });
+            const data = await response.json();
+            console.log(await data);
+            console.log(data[0])
+            $("#card").empty()
+            data.forEach(function (name) {
+                    $("#card").append("ID: " + "<span>" + name["id"] + "</span>" + "<br>" + "Title: " + "<span>" + name["title"] + "</span>" + "<br>" + "Author: " + "<span>" + name["author"] + "</span>" + "<br>" + "Genre: " + "<span>" + name["genre"] + "</span>" + "<br>" + "Description: " + "<span>" + name["description"] + "</span>" + "<br>" + "ISBN: " + "<span>" + name["isbn"] + "</span>" + "<br>" + "ActualQuantity: " + "<span>" + name["actual_quantity"] + "</span>" + "<br>"  + "<br>")
+                    if (name["role_name"] == "Member") {
+                        $("#card").append("<a href='/makeLibrarian/" + name["role_name"] + "'>" + "Make Librarian" + "</a>" + "&nbsp;" + "&nbsp;")
+                        $("#card").append("<a href='#'>" + "Make Admin" + "</a>")
+                    } else if (name["role_name"] == "Librarian") {
+                        $("#card").append("<a href='#'>" + "Make Admin" + "</a>")
+                    }
+                    $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
+            });
+        });
+    });
+</script>
 </html>

@@ -7,6 +7,7 @@ type User struct {
 	Name     string `form:"name" json:"name"`
 	Email    string `form:"email" json:"email" gorm:"unique"`
 	Password string `form:"password" json:"password"`
+	RoleName string `json:"role_name" form:"role_name"`
 }
 
 type Book struct {
@@ -18,7 +19,7 @@ type Book struct {
 	ISBN           string   `form:"isbn" json:"isbn" gorm:"unique"`
 	TotalQuantity  int      `form:"total_quantity" json:"total_quantity"`
 	ActualQuantity int      `form:"actual_quantity" json:"actual_quantity"`
-	Borrow         []Borrow `gorm:"references:ISBN;foreignKey:BookISBN"`
+	Borrow         []Borrow `gorm:"references:ISBN;foreignKey:BookISBN;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type Borrow struct {
