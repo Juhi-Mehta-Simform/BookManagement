@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -61,17 +63,24 @@ func ViewBook(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	var book []models.Book
 	var user models.User
+	var Authors []string
+	var Genres []string
 	if session.Get("userID") != nil {
 		userId := session.Get("userID")
 		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", userId).Find(&user)
 		defer connection.CloseConnection(db)
 		err := connection.GetConnection().Debug().Model(&models.Book{}).Order("id").Find(&book).Error
+		db = connection.GetConnection().Model(&models.Book{}).Distinct("genre").Find(&Genres)
+		db = connection.GetConnection().Model(&models.Book{}).Distinct("author").Find(&Authors)
+		fmt.Println(Authors[0])
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
 			ctx.HTML(http.StatusOK, "viewBook.html", gin.H{
-				"book": book,
-				"user": user,
+				"book":    book,
+				"user":    user,
+				"authors": Authors,
+				"genres":  Genres,
 			})
 		}
 	} else {
@@ -275,9 +284,36 @@ func ReturnRequest(ctx *gin.Context) {
 	}
 }
 func SearchBook(ctx *gin.Context) {
-	query := ctx.Query("query")
+	session := sessions.Default(ctx)
+	if session.Get("userID") != nil {
+		query := ctx.Query("query")
+		var books []models.Book
+		db := connection.GetConnection().Model(&models.Book{}).Where("title ILike ?  OR author ILike ?  OR genre ILike ?  OR isbn ILike ?", "%"+query+"%", "%"+query+"%", "%"+query+"%", "%"+query+"%").Order("id").Find(&books)
+		defer connection.CloseConnection(db)
+		ctx.JSON(http.StatusOK, books)
+	} else {
+		ctx.Redirect(http.StatusMovedPermanently, "/")
+	}
+}
+
+func FilterBook(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	var db *gorm.DB
 	var books []models.Book
-	db := connection.GetConnection().Model(&models.Book{}).Where("title ILike ?  OR author ILike ?  OR genre ILike ?  OR isbn ILike ?", "%"+query+"%", "%"+query+"%", "%"+query+"%", "%"+query+"%").Order("id").Find(&books)
-	defer connection.CloseConnection(db)
-	ctx.JSON(http.StatusOK, books)
+	if session.Get("userID") != nil {
+		genre := ctx.Query("genres")
+		author := ctx.Query("authors")
+		fmt.Println(author)
+		if len(author) != 0 && author != "" {
+			db = connection.GetConnection().Debug().Model(&models.Book{}).Where("author IN (?)", strings.Split(author, ",")).Find(&books)
+		} else {
+			db = connection.GetConnection().Find(&books)
+		}
+		fmt.Println(books)
+		connection.CloseConnection(db)
+		ctx.JSON(http.StatusOK, books)
+	} else {
+		ctx.Redirect(http.StatusMovedPermanently, "/")
+	}
+
 }

@@ -38,4 +38,6 @@ func init() {
 	Server.GET("/makeLibrarian/:user_id", controller.MakeLibrarian)
 	Server.POST("/search", controller.SearchUser)
 	Server.POST("/searchBook", controller.SearchBook)
+	Server.GET("/fetch", controller.GetUser)
+	Server.GET("/filterBook", controller.FilterBook)
 }
