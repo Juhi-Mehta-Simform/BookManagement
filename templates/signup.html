@@ -12,13 +12,25 @@
 <body>
 <h1>Signup</h1>
 <h3>{{.error}}</h3>
-<form action="/signup" method="post" enctype="multipart/form-data">
+<form action="/signup" method="post" enctype="multipart/form-data" id="sign-up">
     <input type="hidden" name="role_name" value="Member">
     Name: <input type="text" name="name" required><br>
     Email: <input type="email" name="email" required><br>
-    Password: <input type="password" name="password" required><br>
-    <input type="submit" value="Submit">
+    Password: <input type="password" name="password" id="password" required><br>
+    <span id="message"></span><br><br>
+    <input type="submit" value="Submit" onclick="validatePassword(event)">
 </form>
 <br><br>
 <a href="/">Login</a>
 </body>
+<script>
+    function validatePassword(event) {
+        var password = document.getElementById("password").value;
+        var pattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+=\-]{8,}$/;
+        if (!pattern.test(password)) {
+            document.getElementById("message").innerHTML = "Password must be 8 characters long with atleast one letter & one number."
+            event.preventDefault();
+        }
+    }
+</script>
+</html>
