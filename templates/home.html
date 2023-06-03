@@ -15,14 +15,17 @@
   <a href="/viewBook">View all books</a><br>
   <a href="/viewUser">View all users</a><br>
   <a href="/viewBorrow">View all borrows</a><br>
+<a href="/viewProfile"> view User</a><br>
   <a href="/logout">Logout</a>
 {{else if eq .user.RoleName "Librarian"}}
 <a href="/viewBook">View all books</a><br>
 <a href="/viewBorrow">View all borrows</a><br>
+<a href="/viewProfile"> view User</a><br>
 <a href="/logout">Logout</a>
 {{else}}
   <a href="/viewBook">View all books</a><br>
   <a href="/userBorrow">Borrow history</a><br>
+  <a href="/viewProfile"> view User</a><br>
   <a href="/logout">Logout</a>
 {{end}}
 </body>

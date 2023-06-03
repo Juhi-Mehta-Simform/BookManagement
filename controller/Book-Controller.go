@@ -72,7 +72,6 @@ func ViewBook(ctx *gin.Context) {
 		err := connection.GetConnection().Debug().Model(&models.Book{}).Order("id").Find(&book).Error
 		db = connection.GetConnection().Model(&models.Book{}).Distinct("genre").Find(&Genres)
 		db = connection.GetConnection().Model(&models.Book{}).Distinct("author").Find(&Authors)
-		fmt.Println(Authors[0])
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
@@ -301,7 +300,7 @@ func FilterBook(ctx *gin.Context) {
 	var db *gorm.DB
 	var books []models.Book
 	if session.Get("userID") != nil {
-		genre := ctx.Query("genres")
+		//genre := ctx.Query("genres")
 		author := ctx.Query("authors")
 		fmt.Println(author)
 		if len(author) != 0 && author != "" {

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Book Management</title>
+    <!--        <style>-->
+    <!--            &lt;!&ndash;-->
+    <!--                @import url("Project/css/dropdown.css");-->
+    <!--            &ndash;&gt;-->
+    <!--        </style>-->
+</head>
+<body>
+<h1>View Profile</h1>
+<h3>{{.error}}</h3>
+    Name: <span>{{.user.Name}}</span><br>
+    Email: <span>{{.user.Email}}</span><br>
+    Role: <span>{{.user.RoleName}}</span><br><br>
+    <a href="/loadProfile/{{.user.UserID}}">Edit Profile</a><br>
+    <a href="/home">Home</a>
+</body>
+</html>

@@ -50,7 +50,9 @@
     Description: <span>{{.Description}}</span><br>
     ISBN: <span>{{.ISBN}}</span><br>
     Available Quantity: <span>{{.ActualQuantity}}</span><br><br>
+    {{if ne .ActualQuantity 0}}
     <a href="/loadBorrow/{{.ID}}">Borrow</a><br>
+    {{end}}
     <p>-----------------------------------------------------------------</p>
     {{end}}
     {{end}}
@@ -78,7 +80,9 @@
                         $("#card").append("<a href='/loadBook/"+name["id"]+"'>" + "Update" + "</a>" + "&nbsp;" + "&nbsp;")
                         $("#card").append("<a href='/loadDelete/"+name["id"]+"'>" + "Delete" + "</a>")
                     } else {
-                        $("#card").append("<a href='/loadBorrow/"+name["id"]+"'>" + "Borrow" + "</a>")
+                        if(name["actual_quantity"]!=0){
+                            $("#card").append("<a href='/loadBorrow/"+name["id"]+"'>" + "Borrow" + "</a>")
+                        }
                     }
                     $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
                 });
@@ -119,11 +123,17 @@
                                 $("#card").append("<a href='/loadBook/" + name["id"] + "'>" + "Update" + "</a>" + "&nbsp;" + "&nbsp;")
                                 $("#card").append("<a href='/loadDelete/" + name["id"] + "'>" + "Delete" + "</a>")
                             } else {
-                                $("#card").append("<a href='/loadBorrow/" + name["id"] + "'>" + "Borrow" + "</a>")
+                                if(book["actual_quantity"]!=0){
+                                    $("#card").append("<a href='/loadBorrow/" + name["id"] + "'>" + "Borrow" + "</a>")
+                                }
                             }
                             $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
                         });
                     }
+                    if(dataUser["role_name"]!="Member"){
+                        $("#card").append("<a href='/addBook'>" + "Add New Book" + "</a>" + "<br>")
+                    }
+                    $("#card").append("<a href='/home'>" + "Home" + "</a>")
                 },
                 error: function (error) {
                     console.log(error);

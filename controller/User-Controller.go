@@ -62,7 +62,55 @@ func GetUser(ctx *gin.Context) {
 		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", userId).Find(&user)
 		defer connection.CloseConnection(db)
 		ctx.JSON(http.StatusOK, user)
-		fmt.Println(user)
+	} else {
+		ctx.Redirect(http.StatusMovedPermanently, "/")
+	}
+}
+
+func UserProfile(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	var user models.User
+	if session.Get("userID") != nil {
+		userId := session.Get("userID")
+		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", userId).Find(&user)
+		defer connection.CloseConnection(db)
+		ctx.HTML(http.StatusOK, "viewProfile.html", gin.H{
+			"user": user,
+		})
+	} else {
+		ctx.Redirect(http.StatusMovedPermanently, "/")
+	}
+}
+
+func LoadProfile(ctx *gin.Context) {
+	var user models.User
+	session := sessions.Default(ctx)
+	if session.Get("userID") != nil {
+		id := ctx.Param("user_id")
+		db := connection.GetConnection().Where("user_id=?", id).Find(&user)
+		defer connection.CloseConnection(db)
+		ctx.HTML(http.StatusOK, "updateProfile.html", gin.H{
+			"user_id": id,
+			"user":    user,
+		})
+	} else {
+		ctx.Redirect(http.StatusFound, "/")
+	}
+}
+
+func UpdateProfile(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	var user models.User
+	if session.Get("userID") != nil {
+		err := ctx.Bind(&user)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, "not ok")
+		} else {
+			fmt.Println(user)
+			db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id=?", user.UserID).Updates(&user)
+			defer connection.CloseConnection(db)
+			ctx.Redirect(http.StatusFound, "/viewProfile")
+		}
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
 	}

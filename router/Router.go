@@ -40,4 +40,7 @@ func init() {
 	Server.POST("/searchBook", controller.SearchBook)
 	Server.GET("/fetch", controller.GetUser)
 	Server.GET("/filterBook", controller.FilterBook)
+	Server.GET("/viewProfile", controller.UserProfile)
+	Server.GET("/loadProfile/:user_id", controller.LoadProfile)
+	Server.POST("/updateProfile", controller.UpdateProfile)
 }
