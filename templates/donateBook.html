@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Book Management</title>
+    <!--    <style>-->
+    <!--        &lt;!&ndash;-->
+    <!--            @import url("css/style.css");-->
+    <!--        &ndash;&gt;-->
+    <!--    </style>-->
+    <style>
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body>
+<h1>Donate Book</h1>
+<form action="/donateBook" method="post">
+    <input type="hidden" name="member_id" value="{{.id}}">
+    Title: <input type="text" name="title" required><br>
+    Author: <input type="text" name="author" required><br>
+    Genre: <input type="text" name="genre" required><br>
+    Description: <input type="text" name="description" required><br>
+    ISBN: <input type="number" name="book_isbn" required><br>
+    Quantity: <input type="number" name="quantity" required value="1"><br>
+    DonateDate: <input type="date" id="date" name="donate_date" readonly><br>
+    <input type="submit" value="Submit">
+</form>
+<br><br>
+</body>
+
+<script>
+    var today = new Date();
+    var Date = today.toISOString().split('T')[0];
+    document.getElementById('date').value = Date;
+</script>
+</html>

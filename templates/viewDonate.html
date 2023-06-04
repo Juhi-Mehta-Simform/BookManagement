@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Book Management</title>
+  <!--    <style>-->
+  <!--        &lt;!&ndash;-->
+  <!--            @import url("css/style.css");-->
+  <!--        &ndash;&gt;-->
+  <!--    </style>-->
+</head>
+<body>
+<h1>View Donated Books</h1>
+
+<h3>{{.error}}</h3>
+{{if eq .user.RoleName "Member"}}
+{{range .donate}}
+Title: <span>{{.Title}}</span><br>
+Author: <span>{{.Author}}</span><br>
+Genre: <span>{{.Genre}}</span><br>
+ISBN: <span>{{.BookISBN}}</span><br>
+IssueDate: <span>{{.DonateDate}}</span><br>
+Quantity: <span>{{.Quantity}}</span><br>
+<p>-----------------------------------------------------------------</p>
+{{end}}
+{{end}}
+{{if eq .user.RoleName "Librarian"}}
+{{range .donate}}
+MemberID: <span>{{.MemberID}}</span><br>
+Title: <span>{{.Title}}</span><br>
+Author: <span>{{.Author}}</span><br>
+Genre: <span>{{.Genre}}</span><br>
+ISBN: <span>{{.BookISBN}}</span><br>
+IssueDate: <span>{{.DonateDate}}</span><br>
+Quantity: <span>{{.Quantity}}</span><br>
+<p>-----------------------------------------------------------------</p>
+{{end}}
+{{end}}
+<a href="/home">Home</a>
+</body>
+</html>

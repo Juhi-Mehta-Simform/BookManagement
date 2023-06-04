@@ -36,6 +36,7 @@ func init() {
 	Server.GET("/returnRequest/:member_id/:book_isbn", controller.ReturnRequest)
 	Server.POST("/returnBook", controller.ReturnBook)
 	Server.GET("/makeLibrarian/:user_id", controller.MakeLibrarian)
+	Server.GET("/makeAdmin/:user_id", controller.MakeAdmin)
 	Server.POST("/search", controller.SearchUser)
 	Server.POST("/searchBook", controller.SearchBook)
 	Server.GET("/fetch", controller.GetUser)
@@ -47,4 +48,9 @@ func init() {
 	Server.POST("/forgetPassword", controller.ForgetPassword)
 	Server.GET("/resetPassword/:email", controller.LoadReset)
 	Server.POST("/resetPassword", controller.ResetPassword)
+	Server.GET("/loadDonate", controller.LoadDonate)
+	Server.POST("/donateBook", controller.DonateBook)
+	Server.GET("/userDonate", controller.UserDonate)
+	Server.GET("/viewDonate", controller.ViewDonate)
+	Server.GET("/filterUser", controller.FilterUser)
 }

@@ -14,7 +14,11 @@
 <h1>View Users</h1>
 <h3>{{.error}}</h3>
 <form action="/search" method="POST">
-    <input type="text" id="searchInput" name="query" placeholder="Search Here">
+    <input type="text" id="searchInput" name="query" placeholder="Search Here"><br>
+    Filter by Role:
+    {{range .roles}}
+    <input type="checkbox" name="roles" id="roleFilter" value="{{.}}">{{.}}
+    {{end}}
 </form><br><br>
 <div id="card">
     {{range .users}}
@@ -25,7 +29,7 @@
     Role: <span>{{.RoleName}}</span><br><br>
     {{if eq .RoleName "Member"}}
     <a href="/makeLibrarian/{{.UserID}}">Make Librarian</a>&nbsp;&nbsp;
-    <a href="#">Make Admin</a>
+    <a href="/makeAdmin/{{.UserID}}">Make Admin</a>
     {{else if eq .RoleName "Librarian"}}
     <a href="#">Make Admin</a>
     {{end}}
@@ -49,7 +53,6 @@
             });
             const data = await response.json();
             const dataUser = await user.json();
-
             console.log(await data);
             $("#card").empty()
             data.forEach(function (name) {
@@ -58,11 +61,9 @@
                         $("#card").append("UserID: " + "<span>" + name["user_id"] + "</span>" + "<br>" + "Name: " + "<span>" + name["name"] + "</span>" + "<br>" + "Email: " + "<span>" + name["email"] + "</span>" + "<br>" + "Role: " + "<span>" + name["role_name"] + "</span>" + "<br>" + "<br>")
                         if (name["role_name"] == "Member") {
                             $("#card").append("<a href='/makeLibrarian/" + name["user_id"] + "'>" + "Make Librarian" + "</a>" + "&nbsp;" + "&nbsp;")
-                            $("#card").append("<a href='#'>" + "Make Admin" + "</a>")
+                            $("#card").append("<a href='/makeAdmin/" + name["user_id"] + "'>" + "Make Admin" + "</a>")
                         } else if (name["role_name"] == "Librarian") {
-                            $("#card").append("<a href='#'>" + "Make Admin" + "<a>")
-                        }else{
-                            $("#card").append("<a href='#'>" + "No" + "<a>")
+                            $("#card").append("<a href='/makeAdmin/" + name["user_id"] + "'>" + "Make Admin" + "<a>")
                         }
                         $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
                     }
@@ -71,4 +72,50 @@
         });
     });
 </script>
+<script>
+    $(document).ready(function() {
+        async function handleFilter() {
+            var roles = [];
+            $('input[name="roles"]:checked').each(function () {
+                roles.push($(this).val());
+            });
+            const member = await fetch('http://localhost:8080/fetch', {
+                method: "GET",
+            });
+            const dataUser = await member.json();
+            $.ajax({
+                url: '/filterUser?role_name='+roles,
+                type: 'GET',
+                success: function (result) {
+                    var users = result;
+                    $("#card").empty();
+                    for (var i = 0; i < users.length; i++) {
+                        [dataUser].forEach(function(userName) {
+                            var user = users[i];
+                            if (user["user_id"] != userName["user_id"]) {
+                                $("#card").append("UserID: " + "<span>" + user["user_id"] + "</span>" + "<br>" + "Name: " + "<span>" + user["name"] + "</span>" + "<br>" + "Email: " + "<span>" + user["email"] + "</span>" + "<br>" + "Role: " + "<span>" + user["role_name"] + "</span>" + "<br>" + "<br>")
+                                if (user["role_name"] == "Member") {
+                                    $("#card").append("<a href='/makeLibrarian/" + user["user_id"] + "'>" + "Make Librarian" + "</a>" + "&nbsp;" + "&nbsp;")
+                                    $("#card").append("<a href='/makeAdmin/" + user["user_id"] + "'>" + "Make Admin" + "</a>")
+                                } else if (user["role_name"] == "Librarian") {
+                                    $("#card").append("<a href='/makeAdmin/" + user["user_id"] + "'>" + "Make Admin" + "<a>")
+                                }
+                                $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
+                            }
+                        });
+                    };
+                    $("#card").append("<a href='/home'>" + "Home" + "</a>")
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+        $('input[name="roles"]').each(function () {
+            console.log("hi")
+            $(this).on('change', handleFilter);
+        });
+    });
+</script>
+
 </html>

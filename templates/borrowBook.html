@@ -8,12 +8,23 @@
   <!--            @import url("css/style.css");-->
   <!--        &ndash;&gt;-->
   <!--    </style>-->
+  <style>
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
 </head>
 <body>
 <h1>Borrow Book</h1>
 <form action="/borrowBook" method="post">
   <input type="hidden" name="id" value="{{.id}}">
   <input type="hidden" name="status" value="pending">
+  <input type="hidden" name="librarian_id" value="0">
   ISBN: <input type="number" name="book_isbn" required value="{{.book.ISBN}}"><br>
   IssueDate: <input type="date" id="date" name="issue_date" readonly><br>
   ReturnDate: <input type="date" id="further" name="due_date" readonly><br>

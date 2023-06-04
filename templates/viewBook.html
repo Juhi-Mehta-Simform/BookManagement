@@ -24,7 +24,6 @@
     {{range .authors}}
          <input type="checkbox" name="authors" id="authorFilter" value="{{.}}">{{.}}
     {{end}}
-    <ul id="bookList"></ul>
 </form><br><br>
 <div id="card">
     {{if ne .user.RoleName "Member"}}
@@ -120,11 +119,11 @@
                             var book = books[i];
                             $("#card").append("ID: " + "<span>" + book["id"] + "</span>" + "<br>" + "Title: " + "<span>" + book["title"] + "</span>" + "<br>" + "Author: " + "<span>" + book["author"] + "</span>" + "<br>" + "Genre: " + "<span>" + book["genre"] + "</span>" + "<br>" + "Description: " + "<span>" + book["description"] + "</span>" + "<br>" + "ISBN: " + "<span>" + book["isbn"] + "</span>" + "<br>" + "ActualQuantity: " + "<span>" + book["actual_quantity"] + "</span>" + "<br>" + "<br>")
                             if (userName["role_name"] != "Member") {
-                                $("#card").append("<a href='/loadBook/" + name["id"] + "'>" + "Update" + "</a>" + "&nbsp;" + "&nbsp;")
-                                $("#card").append("<a href='/loadDelete/" + name["id"] + "'>" + "Delete" + "</a>")
+                                $("#card").append("<a href='/loadBook/" + book["id"] + "'>" + "Update" + "</a>" + "&nbsp;" + "&nbsp;")
+                                $("#card").append("<a href='/loadDelete/" + book["id"] + "'>" + "Delete" + "</a>")
                             } else {
                                 if(book["actual_quantity"]!=0){
-                                    $("#card").append("<a href='/loadBorrow/" + name["id"] + "'>" + "Borrow" + "</a>")
+                                    $("#card").append("<a href='/loadBorrow/" + book["id"] + "'>" + "Borrow" + "</a>")
                                 }
                             }
                             $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
