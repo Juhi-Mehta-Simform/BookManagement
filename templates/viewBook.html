@@ -12,12 +12,11 @@
 </head>
 <body>
 <h1>View Book</h1>
-<h3>{{.error}}</h3>
 <form action="/searchBook" method="POST">
     <input type="text" id="searchInput" name="query" placeholder="Search Here"><br>
     Filter by Genre:
     {{range .genres}}
-    <input type="checkbox" name="genres" id="genreFilter">{{.}}
+    <input type="checkbox" name="genres" id="genreFilter" value="{{.}}">{{.}}
     {{end}}
     <br>
     Filter by Author:
@@ -26,6 +25,8 @@
     {{end}}
 </form><br><br>
 <div id="card">
+    <p>{{.error}}</p>
+
     {{if ne .user.RoleName "Member"}}
     {{range .book}}
     ID: <span>{{.ID}}</span><br>
@@ -50,7 +51,7 @@
     ISBN: <span>{{.ISBN}}</span><br>
     Available Quantity: <span>{{.ActualQuantity}}</span><br><br>
     {{if ne .ActualQuantity 0}}
-    <a href="/loadBorrow/{{.ID}}">Borrow</a><br>
+    <a href="/loadBorrow/{{.ID}}/{{.ISBN}}">Borrow</a><br>
     {{end}}
     <p>-----------------------------------------------------------------</p>
     {{end}}
@@ -80,7 +81,7 @@
                         $("#card").append("<a href='/loadDelete/"+name["id"]+"'>" + "Delete" + "</a>")
                     } else {
                         if(name["actual_quantity"]!=0){
-                            $("#card").append("<a href='/loadBorrow/"+name["id"]+"'>" + "Borrow" + "</a>")
+                            $("#card").append("<a href='/loadBorrow/"+name["id"]+"/"+name["isbn"]+"'>" + "Borrow" + "</a>")
                         }
                     }
                     $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
@@ -104,12 +105,14 @@
             $('input[name="genres"]:checked').each(function () {
                 genres.push($(this).val());
             });
+
+            console.log("hello", genres)
             const user = await fetch('http://localhost:8080/fetch', {
                 method: "GET",
             });
             const dataUser = await user.json();
             $.ajax({
-                url: '/filterBook?authors='+authors,
+                url: '/filterBook?authors='+authors+'&genres='+genres,
                 type: 'GET',
                 success: function (result) {
                     var books = result;
@@ -123,7 +126,7 @@
                                 $("#card").append("<a href='/loadDelete/" + book["id"] + "'>" + "Delete" + "</a>")
                             } else {
                                 if(book["actual_quantity"]!=0){
-                                    $("#card").append("<a href='/loadBorrow/" + book["id"] + "'>" + "Borrow" + "</a>")
+                                    $("#card").append("<a href='/loadBorrow/"+book["id"]+"/"+book["isbn"]+"'>" + "Borrow" + "</a>")
                                 }
                             }
                             $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
@@ -139,7 +142,11 @@
                 }
             });
         }
-        $('input[name="authors"]').each(function () {
+        $('input[name="authors"]' ).each(function () {
+            console.log("hi")
+            $(this).on('change', handleFilter);
+        });
+        $('input[name="genres"]').each(function () {
             console.log("hi")
             $(this).on('change', handleFilter);
         });

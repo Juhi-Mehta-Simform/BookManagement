@@ -28,7 +28,7 @@ func init() {
 	Server.GET("/loadBook/:id", controller.LoadUpdate)
 	Server.POST("/updateBook", controller.UpdateBook)
 	Server.GET("/loadDelete/:id", controller.DeleteBook)
-	Server.GET("/loadBorrow/:id", controller.LoadBorrow)
+	Server.GET("/loadBorrow/:id/:isbn", controller.LoadBorrow)
 	Server.POST("/borrowBook", controller.BorrowBook)
 	Server.GET("/viewBorrow", controller.ViewBorrow)
 	Server.GET("/userBorrow", controller.UserBorrow)
@@ -53,4 +53,7 @@ func init() {
 	Server.GET("/userDonate", controller.UserDonate)
 	Server.GET("/viewDonate", controller.ViewDonate)
 	Server.GET("/filterUser", controller.FilterUser)
+	Server.GET("/borrowHistory/:user_id", controller.BorrowHistory)
+	Server.GET("/donateHistory/:user_id", controller.DonateHistory)
+	Server.GET("/reminder/:member_id", controller.Reminder)
 }

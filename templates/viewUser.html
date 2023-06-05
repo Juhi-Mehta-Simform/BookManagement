@@ -21,20 +21,40 @@
     {{end}}
 </form><br><br>
 <div id="card">
-    {{range .users}}
-    {{if ne .UserID $.user.UserID}}
-    UserID: <span>{{.UserID}}</span><br>
-    Name: <span>{{.Name}}</span><br>
-    Email: <span>{{.Email}}</span><br>
-    Role: <span>{{.RoleName}}</span><br><br>
-    {{if eq .RoleName "Member"}}
-    <a href="/makeLibrarian/{{.UserID}}">Make Librarian</a>&nbsp;&nbsp;
-    <a href="/makeAdmin/{{.UserID}}">Make Admin</a>
-    {{else if eq .RoleName "Librarian"}}
-    <a href="#">Make Admin</a>
-    {{end}}
-    <p>-----------------------------------------------------------------</p>
-    {{end}}
+    {{if eq .user.RoleName "Admin"}}
+        {{range .users}}
+            {{if ne .UserID $.user.UserID}}
+                UserID: <span>{{.UserID}}</span><br>
+                Name: <span>{{.Name}}</span><br>
+                Email: <span>{{.Email}}</span><br>
+                Role: <span>{{.RoleName}}</span><br><br>
+                {{if eq .RoleName "Member"}}
+                    <a href="/borrowHistory/{{.UserID}}">View Borrow History</a>&nbsp;&nbsp;
+                    <a href="/donateHistory/{{.UserID}}">View Donate History</a><br><br>
+                    <a href="/makeLibrarian/{{.UserID}}">Make Librarian</a>&nbsp;&nbsp;
+                    <a href="/makeAdmin/{{.UserID}}">Make Admin</a>
+                {{else if eq .RoleName "Librarian"}}
+                    <a href="/makeAdmin/{{.UserID}}">Make Admin</a>
+                {{end}}
+                <p>-----------------------------------------------------------------</p>
+            {{end}}
+        {{end}}
+    {{else if eq .user.RoleName "Librarian"}}
+        {{range .users}}
+            {{if ne .UserID $.user.UserID}}
+                {{if ne .RoleName "Admin"}}
+                    UserID: <span>{{.UserID}}</span><br>
+                    Name: <span>{{.Name}}</span><br>
+                    Email: <span>{{.Email}}</span><br>
+                    Role: <span>{{.RoleName}}</span><br><br>
+                    {{if eq .RoleName "Member"}}
+                        <a href="/borrowHistory/{{.UserID}}">View Borrow History</a>&nbsp;&nbsp;
+                        <a href="/donateHistory/{{.UserID}}">View Donate History</a><br><br>
+                    {{end}}
+                    <p>-----------------------------------------------------------------</p>
+                {{end}}
+            {{end}}
+        {{end}}
     {{end}}
     <a href="/home">Home</a>
 </div>
@@ -60,6 +80,8 @@
                     if (name["user_id"] != userName["user_id"]) {
                         $("#card").append("UserID: " + "<span>" + name["user_id"] + "</span>" + "<br>" + "Name: " + "<span>" + name["name"] + "</span>" + "<br>" + "Email: " + "<span>" + name["email"] + "</span>" + "<br>" + "Role: " + "<span>" + name["role_name"] + "</span>" + "<br>" + "<br>")
                         if (name["role_name"] == "Member") {
+                            $("#card").append("<a href='/borrowHistory/" + name["user_id"] + "'>" + "View Borrow History" + "</a>" + "&nbsp;" + "&nbsp;")
+                            $("#card").append("<a href='/donateHistory/" + name["user_id"] + "'>" + "View Donate History" + "</a>" + "<br>" + "<br>")
                             $("#card").append("<a href='/makeLibrarian/" + name["user_id"] + "'>" + "Make Librarian" + "</a>" + "&nbsp;" + "&nbsp;")
                             $("#card").append("<a href='/makeAdmin/" + name["user_id"] + "'>" + "Make Admin" + "</a>")
                         } else if (name["role_name"] == "Librarian") {
@@ -69,6 +91,8 @@
                     }
                 });
             });
+            $("#card").append("<a href='/home'>" + "Home" + "</a>")
+
         });
     });
 </script>
@@ -95,6 +119,8 @@
                             if (user["user_id"] != userName["user_id"]) {
                                 $("#card").append("UserID: " + "<span>" + user["user_id"] + "</span>" + "<br>" + "Name: " + "<span>" + user["name"] + "</span>" + "<br>" + "Email: " + "<span>" + user["email"] + "</span>" + "<br>" + "Role: " + "<span>" + user["role_name"] + "</span>" + "<br>" + "<br>")
                                 if (user["role_name"] == "Member") {
+                                    $("#card").append("<a href='/borrowHistory/" + user["user_id"] + "'>" + "View Borrow History" + "</a>" + "&nbsp;" + "&nbsp;")
+                                    $("#card").append("<a href='/donateHistory/" + user["user_id"] + "'>" + "View Donate History" + "</a>" + "<br>" + "<br>")
                                     $("#card").append("<a href='/makeLibrarian/" + user["user_id"] + "'>" + "Make Librarian" + "</a>" + "&nbsp;" + "&nbsp;")
                                     $("#card").append("<a href='/makeAdmin/" + user["user_id"] + "'>" + "Make Admin" + "</a>")
                                 } else if (user["role_name"] == "Librarian") {

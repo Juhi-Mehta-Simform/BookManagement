@@ -20,8 +20,8 @@
     Genre: <span>{{.Genre}}</span><br>
     ISBN: <span>{{.BookISBN}}</span><br>
     Status: <span>{{.Status}}</span><br>
-    IssueDate: <span>{{.IssueDate}}</span><br>
-    DueDate: <span>{{.DueDate}}</span><br>
+    IssueDate: <span>{{.IssueDate.Format "2006-01-02"}}</span><br>
+    DueDate: <span>{{.DueDate.Format "2006-01-02"}}</span><br>
     {{if eq .Status "pending"}}
     <a href="/loadReturn/{{.BookISBN}}">Return</a><br>
     {{else if eq .Status "Returned"}}
@@ -30,7 +30,8 @@
     <p>-----------------------------------------------------------------</p>
   {{end}}
 {{else}}
-    <form></form>
+{{ $today := .today}}
+{{$today}}<br>
     {{range .borrow}}
         MemberID: <span>{{.MemberID}}</span><br>
         Title: <span>{{.Title}}</span><br>
@@ -38,16 +39,21 @@
         Genre: <span>{{.Genre}}</span><br>
         ISBN: <span>{{.BookISBN}}</span><br>
         Status: <span>{{.Status}}</span><br>
-        IssueDate: <span>{{.IssueDate}}</span><br>
-        DueDate: <span>{{.DueDate}}</span><br>
+        IssueDate: <span>{{.IssueDate.Format "2006-01-02"}}</span><br>
+        DueDate: <span>{{.DueDate.Format "2006-01-02"}}</span><br>
         {{if eq .Status "requested"}}
             <a href="/returnRequest/{{.MemberID}}/{{.BookISBN}}">Accept Return Request</a><br>
         {{else if eq .Status "Returned"}}
             Returned To(LibrarianID): <span>{{.LibrarianID}}</span>
         {{end}}
+        {{$DueDate := .DueDate.Format "2006-01-02"}}
+        {{if lt $DueDate $today}}
+            <a href="/reminder/{{.MemberID}}">Send Reminder</a>
+        {{end}}
         <p>-----------------------------------------------------------------</p>
     {{end}}
 {{end}}
+<a href="/home">Home</a><br>
 <a href="/viewBook">View all books</a>
 </body>
 </html>

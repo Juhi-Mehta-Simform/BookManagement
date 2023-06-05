@@ -11,6 +11,7 @@
 </head>
 <body>
 <h1>Home</h1>
+<h3>{{.error}}</h3>
 {{if eq .user.RoleName "Admin"}}
   <a href="/viewBook">View all books</a><br>
   <a href="/viewUser">View all users</a><br>

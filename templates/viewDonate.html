@@ -19,7 +19,7 @@ Title: <span>{{.Title}}</span><br>
 Author: <span>{{.Author}}</span><br>
 Genre: <span>{{.Genre}}</span><br>
 ISBN: <span>{{.BookISBN}}</span><br>
-IssueDate: <span>{{.DonateDate}}</span><br>
+IssueDate: <span>{{.DonateDate.Format "2006-01-02"}}</span><br>
 Quantity: <span>{{.Quantity}}</span><br>
 <p>-----------------------------------------------------------------</p>
 {{end}}
@@ -31,7 +31,7 @@ Title: <span>{{.Title}}</span><br>
 Author: <span>{{.Author}}</span><br>
 Genre: <span>{{.Genre}}</span><br>
 ISBN: <span>{{.BookISBN}}</span><br>
-IssueDate: <span>{{.DonateDate}}</span><br>
+IssueDate: <span>{{.DonateDate.Format "2006-01-02"}}</span><br>
 Quantity: <span>{{.Quantity}}</span><br>
 <p>-----------------------------------------------------------------</p>
 {{end}}

@@ -29,10 +29,17 @@
     Genre: <input type="text" name="genre" required><br>
     Description: <input type="text" name="description" required><br>
     ISBN: <input type="number" name="isbn" required><br>
-    Total Quantity: <input type="number" name="total_quantity" required><br>
-    Actual Quantity: <input type="number" name="actual_quantity" required><br>
+    Total Quantity: <input type="number" name="total_quantity" id="tq" required onkeyup="copyValue()"><br>
+    Actual Quantity: <input type="number" name="actual_quantity" id="aq" required readonly><br>
     <input type="submit" value="Submit">
 </form>
 <br><br>
 </body>
+<script>
+    function copyValue() {
+        var input1Value = document.getElementById("tq").value;
+        document.getElementById("aq").value = input1Value;
+    }
+</script>
+
 </html>

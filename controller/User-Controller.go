@@ -62,7 +62,7 @@ func SearchUser(ctx *gin.Context) {
 	query := ctx.Query("query")
 	fmt.Println(query)
 	var users []models.User
-	db := connection.GetConnection().Model(&models.User{}).Where("name ILike ?  OR role_name ILike ?", "%"+query+"%", "%"+query+"%").Order("user_id").Find(&users)
+	db := connection.GetConnection().Model(&models.User{}).Where("name ILike ?", "%"+query+"%").Order("user_id").Find(&users)
 	defer connection.CloseConnection(db)
 	fmt.Println(users)
 	ctx.JSON(http.StatusOK, users)

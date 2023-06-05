@@ -8,6 +8,8 @@ type User struct {
 	Email    string `form:"email" json:"email" gorm:"unique"`
 	Password string `form:"password" json:"password"`
 	RoleName string `json:"role_name" form:"role_name"`
+	Age      int    `json:"age" form:"age"`
+	Gender   string `json:"gender" form:"gender"`
 }
 
 type Book struct {
