@@ -22,12 +22,12 @@
 <body>
 <h1>Add Book</h1>
 <h3>{{.error}}</h3>
-<form action="/addBook" method="post" enctype="multipart/form-data">
+<form action="/addBook" method="post" enctype="multipart/form-data"  autocomplete="off">
     <input type="hidden" name="id"><br>
     Title: <input type="text" name="title" required><br>
     Author: <input type="text" name="author" required><br>
     Genre: <input type="text" name="genre" required><br>
-    Description: <input type="text" name="description" required><br>
+    Description: <textarea name="description" required></textarea><br>
     ISBN: <input type="number" name="isbn" required><br>
     Total Quantity: <input type="number" name="total_quantity" id="tq" required onkeyup="copyValue()"><br>
     Actual Quantity: <input type="number" name="actual_quantity" id="aq" required readonly><br>

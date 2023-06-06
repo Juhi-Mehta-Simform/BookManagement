@@ -31,6 +31,7 @@ func init() {
 	Server.GET("/loadBorrow/:id/:isbn", controller.LoadBorrow)
 	Server.POST("/borrowBook", controller.BorrowBook)
 	Server.GET("/viewBorrow", controller.ViewBorrow)
+	Server.GET("/viewRequest", controller.ViewRequest)
 	Server.GET("/userBorrow", controller.UserBorrow)
 	Server.GET("/loadReturn/:book_isbn", controller.LoadReturn)
 	Server.GET("/returnRequest/:member_id/:book_isbn", controller.ReturnRequest)

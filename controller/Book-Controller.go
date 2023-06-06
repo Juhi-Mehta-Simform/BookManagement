@@ -51,10 +51,17 @@ func CreateBook(ctx *gin.Context) {
 		book.Description = ctx.PostForm("description")
 		book.ISBN = ctx.PostForm("isbn")
 		book.TotalQuantity, _ = strconv.Atoi(ctx.PostForm("total_quantity"))
-		book.ActualQuantity, _ = strconv.Atoi(ctx.PostForm("_quantity"))
-		db := connection.GetConnection().Create(&book)
-		defer connection.CloseConnection(db)
-		ctx.Redirect(http.StatusFound, "/viewBook")
+		book.ActualQuantity, _ = strconv.Atoi(ctx.PostForm("actual_quantity"))
+		err := connection.GetConnection().Create(&book).Error
+		if err != nil {
+			if strings.Contains(err.Error(), "duplicate") {
+				ctx.HTML(http.StatusBadRequest, "addBook.html", gin.H{
+					"error": "Book already exists",
+				})
+			}
+		} else {
+			ctx.Redirect(http.StatusFound, "/viewBook")
+		}
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
 	}
@@ -180,7 +187,7 @@ func BorrowBook(ctx *gin.Context) {
 			db = connection.GetConnection().Create(&borrow)
 			newQuantity := book.ActualQuantity - 1
 			db = connection.GetConnection().Model(&models.Book{}).Where("isbn=?", borrow.BookISBN).Update("actual_quantity", newQuantity)
-			ctx.Redirect(http.StatusFound, "/viewBook")
+			ctx.Redirect(http.StatusFound, "/userBorrow")
 		}
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
@@ -204,6 +211,25 @@ func ViewBorrow(ctx *gin.Context) {
 				"borrow": borrowList,
 				"user":   user,
 				"today":  today,
+			})
+		}
+	} else {
+		ctx.Redirect(http.StatusMovedPermanently, "/")
+	}
+}
+
+func ViewRequest(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	var borrowList []models.BorrowBook
+	if session.Get("userID") != nil {
+		db := connection.GetConnection()
+		defer connection.CloseConnection(db)
+		err := connection.GetConnection().Debug().Model(&models.Borrow{}).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.member_id, borrows.status, borrows.librarian_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList).Error
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, "not ok")
+		} else {
+			ctx.HTML(http.StatusOK, "viewReturnRequest.html", gin.H{
+				"borrow": borrowList,
 			})
 		}
 	} else {
@@ -466,11 +492,19 @@ func SendReminder(email string) error {
 	)
 	msg := fmt.Sprintf("Subject: Reminder for overdue book\r\n" +
 		"This is a reminder for overdue books. So please return it as soon as possible")
+	to := []string{email}
 	err := smtp.SendMail(
 		"smtp.gmail.com:587",
 		auth,
 		"juhi.mehta.0604@gmail.com",
-		[]string{email},
+		to,
+		[]byte(msg),
+	)
+	err = smtp.SendMail(
+		"smtp.office365.com:587",
+		auth,
+		"juhi.mehta.0604@gmail.com",
+		to,
 		[]byte(msg),
 	)
 	if err != nil {

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Book Management</title>
+  <!--    <style>-->
+  <!--        &lt;!&ndash;-->
+  <!--            @import url("css/style.css");-->
+  <!--        &ndash;&gt;-->
+  <!--    </style>-->
+</head>
+<body>
+<h1>View Requests</h1>
+<h3>{{.error}}</h3>
+{{range .borrow}}
+  {{if eq .Status "requested"}}
+    MemberID: <span>{{.MemberID}}</span><br>
+    Title: <span>{{.Title}}</span><br>
+    Author: <span>{{.Author}}</span><br>
+    Genre: <span>{{.Genre}}</span><br>
+    ISBN: <span>{{.BookISBN}}</span><br>
+    Status: <span>{{.Status}}</span><br>
+    IssueDate: <span>{{.IssueDate.Format "2006-01-02"}}</span><br>
+    DueDate: <span>{{.DueDate.Format "2006-01-02"}}</span><br>
+    <a href="/returnRequest/{{.MemberID}}/{{.BookISBN}}">Accept Return Request</a><br>
+    <p>-----------------------------------------------------------------</p>
+  {{end}}
+{{end}}
+</body>
+</html>
