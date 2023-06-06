@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Book Management</title>
+  <script src="https://kit.fontawesome.com/b2a400ec90.js" crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+  <!--    <style>-->
+  <!--        &lt;!&ndash;-->
+  <!--            @import url("css/style.css");-->
+  <!--        &ndash;&gt;-->
+  <!--    </style>-->
+</head>
+<body>
+<header class="p-3 text-bg-dark">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+      <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+        <img height="40px" width="150px" src="/css/logo.png">
+      </a>
+      <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+      </ul>
+      <div class="text-end">
+        <a href="/viewProfile"><button type="button" class="btn btn-outline-light me-2">View Profile</button></a>
+        <a href="/logout"><button type="button" class="btn btn-warning">Logout</button></a>
+      </div>
+    </div>
+  </div>
+</header>
+<h3>{{.error}}</h3>
+<div class="container px-4 py-5">
+  <div class="row row-cols-1 row-cols-md-2 align-items-md-center g-5 py-5">
+    <div class="col d-flex flex-column align-items-start gap-2">
+      <h1 class="fw-bold text-body-emphasis">Welcome to BookHere<span style="color:#ffc107">.</span></h1>
+      <p class="text-body-secondary">Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and probably just keep going until we run out of words.</p>
+      <a href="/viewBook" class="btn btn-warning btn-lg">View Book</a>
+    </div>
+  </div>
+</div>
+
+<div class="container marketing">
+<div class="row text-center">
+  {{if eq .user.RoleName "Admin"}}
+    <div class="col-lg-4">
+    <span class="fa-stack fa-4x mb-3">
+      <i class="fa fa-circle fa-stack-2x icon-background" style="color: black"></i>
+      <i class="fa fa-user fa-stack" style="color: white"></i>
+    </span>
+      <p><a class="btn btn-warning" href="/viewUser">View All Users</a></p>
+    </div>
+    <div class="col-lg-4">
+    <span class="fa-stack fa-4x mb-3">
+    <i class="fa fa-circle fa-stack-2x icon-background" style="color: black"></i>
+    <i class="fa fa-book fa-stack" style="color: white"></i>
+    </span>
+      <p><a class="btn btn-warning" href="/viewBorrow">View All Borrowed Books</a></p>
+    </div>
+    <div class="col-lg-4">
+      <span class="fa-stack fa-4x mb-3">
+        <i class="fa fa-circle fa-stack-2x icon-background" style="color: black"></i>
+        <i class="fas fa-gift fa-stack" style="color: white"></i>
+      </span>
+      <p><a class="btn btn-warning" href="/viewDonate">View All Donated Books</a></p>
+    </div>
+  {{else if eq .user.RoleName "Librarian"}}
+  <div class="col-lg-3">
+    <span class="fa-stack fa-4x mb-3">
+      <i class="fa fa-circle fa-stack-2x icon-background" style="color: black"></i>
+      <i class="fa fa-user fa-stack" style="color: white"></i>
+    </span>
+    <p><a class="btn btn-warning" href="/viewUser">View All Users</a></p>
+  </div>
+  <div class="col-lg-3">
+    <span class="fa-stack fa-4x mb-3">
+    <i class="fa fa-circle fa-stack-2x icon-background" style="color: black"></i>
+    <i class="fa fa-book fa-stack" style="color: white"></i>
+    </span>
+    <p><a class="btn btn-warning" href="/viewBorrow">View All Borrowed Books</a></p>
+  </div>
+  <div class="col-lg-3">
+    <span class="fa-stack fa-4x mb-3">
+    <i class="fa fa-circle fa-stack-2x icon-background" style="color: black"></i>
+    <i class="fas fa-retweet fa-stack" style="color: white"></i>
+    </span>
+    <p><a class="btn btn-warning" href="/viewRequest">View All Return Request</a></p>
+  </div>
+  <div class="col-lg-3">
+    <span class="fa-stack fa-4x mb-3">
+    <i class="fa fa-circle fa-stack-2x icon-background" style="color: black"></i>
+    <i class="fas fa-gift fa-stack" style="color: white"></i>
+    </span>
+    <p><a class="btn btn-warning" href="/viewDonate">View All Donated Books</a></p>
+  </div>
+  {{else}}
+  <div class="col-lg-4">
+    <span class="fa-stack fa-4x mb-3">
+    <i class="fa fa-circle fa-stack-2x icon-background" style="color: black"></i>
+    <i class="fa fa-book fa-stack" style="color: white"></i>
+    </span>
+    <p><a class="btn btn-warning" href="/userBorrow">View Borrow History</a></p>
+  </div>
+  <div class="col-lg-4">
+    <span class="fa-stack fa-4x mb-3">
+    <i class="fa fa-circle fa-stack-2x icon-background" style="color: black"></i>
+    <i class="fas fa-gift fa-stack" style="color: white"></i>
+    </span>
+    <p><a class="btn btn-warning" href="/loadDonate">Donate a Book</a></p>
+  </div>
+  <div class="col-lg-4">
+    <span class="fa-stack fa-4x mb-3">
+    <i class="fa fa-circle fa-stack-2x icon-background" style="color: black"></i>
+    <i class="fas fa-retweet fa-stack" style="color: white"></i>
+    </span>
+    <p><a class="btn btn-warning" href="/userDonate">View Donated Books</a></p>
+  </div>
+  {{end}}
+</div><!-- /.row -->
+
+</div>
+</body>
+</html>

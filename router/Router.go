@@ -14,7 +14,8 @@ var (
 func init() {
 	store := cookie.NewStore([]byte("secret"))
 	Server.Use(sessions.Sessions("mysession", store))
-	Server.LoadHTMLGlob("templates/*")
+	Server.LoadHTMLGlob("templates/html/*")
+	Server.Static("/css", "templates/css")
 	Server.GET("/", controller.LoadLogin)
 	Server.POST("/login", controller.Login)
 	Server.GET("/logout", controller.Logout)
