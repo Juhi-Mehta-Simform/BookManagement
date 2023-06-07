@@ -98,11 +98,9 @@ func sendResetPasswordEmail(email string) {
 		"yczvyrzalemzefif",
 		"smtp.gmail.com",
 	)
-	fmt.Println(email)
 	bytes, err := bcrypt.GenerateFromPassword([]byte(email), 0)
-	fmt.Println(string(bytes))
 	msg := fmt.Sprintf("Subject: Reset Password\r\n"+
-		"Please follow the below link to reset your password\n: http://localhost:8080/resetPassword/%s",
+		"Please follow the below link to reset your password\n: http://localhost:8080/resetPassword?email=%s",
 		string(bytes))
 	err = smtp.SendMail(
 		"smtp.gmail.com:587",
@@ -126,7 +124,7 @@ func sendResetPasswordEmail(email string) {
 func LoadReset(ctx *gin.Context) {
 	var users []models.User
 	var user models.User
-	email := ctx.Param("email")
+	email := ctx.Query("email")
 	var userId int
 	db := connection.GetConnection().Model(&models.User{}).Select("user_id, email").Find(&users)
 	for i, _ := range users {
@@ -136,6 +134,8 @@ func LoadReset(ctx *gin.Context) {
 			break
 		}
 	}
+	fmt.Println(email)
+	fmt.Println(userId)
 	db = connection.GetConnection().Where("user_id=?", userId).Find(&user)
 	connection.CloseConnection(db)
 	ctx.HTML(http.StatusOK, "resetPassword.html", gin.H{

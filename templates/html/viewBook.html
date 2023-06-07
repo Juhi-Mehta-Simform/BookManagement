@@ -4,14 +4,30 @@
     <meta charset="utf-8">
     <title>Book Management</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!--    <style>-->
-    <!--        &lt;!&ndash;-->
-    <!--            @import url("css/style.css");-->
-    <!--        &ndash;&gt;-->
-    <!--    </style>-->
+    <script src="https://kit.fontawesome.com/b2a400ec90.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
 </head>
 <body>
-<h1>View Book</h1>
+{{$user := .user}}
+<header class="p-3 text" style="background-color: black">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+                <img height="40px" width="150px" src="/css/logo.png">
+            </a>
+            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+            </ul>
+            <div class="text-end">
+                <a href="/home "><button type="button" class="btn btn-outline-light me-2">Home</button></a>
+                {{if eq $user.RoleName "Librarian"}}
+                <a href="/addBook"><button type="button" class="btn btn-outline-light me-2">Add New Book</button></a>
+                {{end}}
+                <a href="/logout"><button type="button" class="btn btn-warning">Logout</button></a>
+            </div>
+        </div>
+    </div>
+</header>
 <form action="/searchBook" method="POST">
     <input type="text" id="searchInput" name="query" placeholder="Search Here"><br>
     Filter by Genre:
@@ -24,43 +40,116 @@
          <input type="checkbox" name="authors" id="authorFilter" value="{{.}}">{{.}}
     {{end}}
 </form><br><br>
-<div id="card">
-    <p>{{.error}}</p>
-
-    {{if ne .user.RoleName "Member"}}
-    {{range .book}}
-    ID: <span>{{.ID}}</span><br>
-    Title: <span>{{.Title}}</span><br>
-    Author: <span>{{.Author}}</span><br>
-    Genre: <span>{{.Genre}}</span><br>
-    Description: <span>{{.Description}}</span><br>
-    ISBN: <span>{{.ISBN}}</span><br>
-    Available Quantity: <span>{{.ActualQuantity}}</span><br><br>
-    <a href="/loadBook/{{.ID}}">Update</a>&nbsp; &nbsp;
-    <a href="/loadDelete/{{.ID}}">Delete</a>&nbsp; &nbsp;
-    <p>-----------------------------------------------------------------</p>
-    {{end}}
-    <a href="/addBook">Add a New Book</a><br>
-    {{else}}
-    {{range .book}}
-    ID: <span>{{.ID}}</span><br>
-    Title: <span>{{.Title}}</span><br>
-    Author: <span>{{.Author}}</span><br>
-    Genre: <span>{{.Genre}}</span><br>
-    Description: <span>{{.Description}}</span><br>
-    ISBN: <span>{{.ISBN}}</span><br>
-    Available Quantity: <span>{{.ActualQuantity}}</span><br><br>
-    {{if ne .ActualQuantity 0}}
-    <a href="/loadBorrow/{{.ID}}/{{.ISBN}}">Borrow</a><br>
-    {{end}}
-    <p>-----------------------------------------------------------------</p>
-    {{end}}
-    {{end}}
-    <a href="/home">Home</a>
+<div class="container-fluid">
+        <div class="container">
+            <div class="row justify-content-center" id="card">
+                {{range .book}}
+                <div class="col-xl-4 col-md-8 mb-3">
+                    <div  class="card mb-2 shadow-sm h-100">
+                        <div class="card-body h-100">
+                            <div class="card-text d-flex flex-column justify-content-between h-100">
+                                <div class="">
+                                <table>
+                                    <tr>
+                                        <td class="align-top col-4">ID: </td>
+                                        <td class="col-8">{{.ID}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-4">Title: </td>
+                                        <td class="col-8">{{.Title}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-4">Author: </td>
+                                        <td class="col-8">{{.Author}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-4">Genre: </td>
+                                        <td class="col-8">{{.Genre}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-4">Description: </td>
+                                        <td class="col-8">{{.Description}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-4">ISBN: </td>
+                                        <td class="col-8">{{.ISBN}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-4">Available:</td>
+                                        <td class="col-8">{{.ActualQuantity}}</td>
+                                    </tr>
+                                </table>
+                                </div>
+                                <div class="mx-auto mt-10">
+                                    {{if ne $user.RoleName "Member"}}
+                                        <a class="btn btn-warning" href="/loadBook/{{.ID}}">Update</a>
+                                        <a class="btn btn-warning" href="/loadDelete/{{.ID}}">Delete</a>
+                                    {{else}}
+                                        <a class="btn btn-warning" href="/loadBorrow/{{.ID}}/{{.ISBN}}">Borrow</a>
+                                    {{end}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
 </div>
 </body>
 <script>
     $(document).ready(function() {
+        function Add(html, name, userName){
+            html += '<div class="col-xl-4 col-md-8 mb-3">';
+            html += '<div class="card mb-2 shadow-sm h-100">';
+            html += '<div class="card-body h-100">';
+            html += '<div class="card-text d-flex flex-column justify-content-between h-100">';
+            html += '<div class="">';
+            html += '<table>';
+            html += '<tr>';
+            html += '<td class="align-top col-4">ID: </td>';
+            html += '<td class="col-8">' + name["id"] + '</td>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td class="align-top col-4">Title: </td>';
+            html += '<td class="col-8">' + name["title"] + '</td>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td class="align-top col-4">Author: </td>';
+            html += '<td class="col-8">' + name["author"] + '</td>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td class="align-top col-4">Genre: </td>';
+            html += '<td class="col-8">' + name["genre"] + '</td>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td class="align-top col-4">Description: </td>';
+            html += '<td class="col-8">' + name["description"] + '</td>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td class="align-top col-4">ISBN: </td>';
+            html += '<td class="col-8">' + name["isbn"] + '</td>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td class="align-top col-4">Available:</td>';
+            html += '<td class="col-8">' + name["actual_quantity"] + '</td>';
+            html += '</tr>';
+            html += '</table>';
+            html += '</div>';
+            html += '<div class="mx-auto mt-10">';
+            if (userName["role_name"] != "Member") {
+                html += '<a class="btn btn-warning me-1" href="/loadBook/' + name["id"] + '">Update</a>';
+                html += '<a class="btn btn-warning" href="/loadDelete/' + name["id"] + '">Delete</a>';
+            } else {
+                html += '<a class="btn btn-warning" href="/loadBorrow/' + name["id"] + '/' + name["isbn"] + '">Borrow</a>';
+            }
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            return html
+        }
         searchInput = $("#searchInput")
         searchInput.on('input' , async function(){
             var lower = searchInput.val()
@@ -73,40 +162,23 @@
             const data = await response.json();
             const dataUser = await user.json();
             $("#card").empty()
+            var html = "";
             data.forEach(function (name) {
                 [dataUser].forEach(function(userName) {
-                    $("#card").append("ID: " + "<span>" + name["id"] + "</span>" + "<br>" + "Title: " + "<span>" + name["title"] + "</span>" + "<br>" + "Author: " + "<span>" + name["author"] + "</span>" + "<br>" + "Genre: " + "<span>" + name["genre"] + "</span>" + "<br>" + "Description: " + "<span>" + name["description"] + "</span>" + "<br>" + "ISBN: " + "<span>" + name["isbn"] + "</span>" + "<br>" + "ActualQuantity: " + "<span>" + name["actual_quantity"] + "</span>" + "<br>"  + "<br>")
-                    if (userName["role_name"] != "Member") {
-                        $("#card").append("<a href='/loadBook/"+name["id"]+"'>" + "Update" + "</a>" + "&nbsp;" + "&nbsp;")
-                        $("#card").append("<a href='/loadDelete/"+name["id"]+"'>" + "Delete" + "</a>")
-                    } else {
-                        if(name["actual_quantity"]!=0){
-                            $("#card").append("<a href='/loadBorrow/"+name["id"]+"/"+name["isbn"]+"'>" + "Borrow" + "</a>")
-                        }
-                    }
-                    $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
+                   html += Add(html, name, userName)
                 });
             });
-            if(dataUser["role_name"]!="Member"){
-                $("#card").append("<a href='/addBook'>" + "Add New Book" + "</a>" + "<br>")
-            }
-            $("#card").append("<a href='/home'>" + "Home" + "</a>")
+            $("#card").append(html)
         });
-    });
-</script>
-<script>
-    $(document).ready(function() {
         async function handleFilter() {
             var authors = [];
             var genres = [];
             $('input[name="authors"]:checked').each(function () {
-                    authors.push($(this).val());
+                authors.push($(this).val());
             });
             $('input[name="genres"]:checked').each(function () {
                 genres.push($(this).val());
             });
-
-            console.log("hello", genres)
             const user = await fetch('http://localhost:8080/fetch', {
                 method: "GET",
             });
@@ -117,25 +189,14 @@
                 success: function (result) {
                     var books = result;
                     $("#card").empty();
+                    var html = ""
                     for (var i = 0; i < books.length; i++) {
                         [dataUser].forEach(function (userName) {
-                            var book = books[i];
-                            $("#card").append("ID: " + "<span>" + book["id"] + "</span>" + "<br>" + "Title: " + "<span>" + book["title"] + "</span>" + "<br>" + "Author: " + "<span>" + book["author"] + "</span>" + "<br>" + "Genre: " + "<span>" + book["genre"] + "</span>" + "<br>" + "Description: " + "<span>" + book["description"] + "</span>" + "<br>" + "ISBN: " + "<span>" + book["isbn"] + "</span>" + "<br>" + "ActualQuantity: " + "<span>" + book["actual_quantity"] + "</span>" + "<br>" + "<br>")
-                            if (userName["role_name"] != "Member") {
-                                $("#card").append("<a href='/loadBook/" + book["id"] + "'>" + "Update" + "</a>" + "&nbsp;" + "&nbsp;")
-                                $("#card").append("<a href='/loadDelete/" + book["id"] + "'>" + "Delete" + "</a>")
-                            } else {
-                                if(book["actual_quantity"]!=0){
-                                    $("#card").append("<a href='/loadBorrow/"+book["id"]+"/"+book["isbn"]+"'>" + "Borrow" + "</a>")
-                                }
-                            }
-                            $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
+                            var name = books[i];
+                            html += Add(html, name, userName)
                         });
                     }
-                    if(dataUser["role_name"]!="Member"){
-                        $("#card").append("<a href='/addBook'>" + "Add New Book" + "</a>" + "<br>")
-                    }
-                    $("#card").append("<a href='/home'>" + "Home" + "</a>")
+                    $("#card").append(html)
                 },
                 error: function (error) {
                     console.log(error);

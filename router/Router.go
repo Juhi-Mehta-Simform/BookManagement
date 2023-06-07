@@ -48,7 +48,7 @@ func init() {
 	Server.POST("/updateProfile", controller.UpdateProfile)
 	Server.GET("/forgetPassword", controller.LoadForget)
 	Server.POST("/forgetPassword", controller.ForgetPassword)
-	Server.GET("/resetPassword/:email", controller.LoadReset)
+	Server.GET("/resetPassword", controller.LoadReset)
 	Server.POST("/resetPassword", controller.ResetPassword)
 	Server.GET("/loadDonate", controller.LoadDonate)
 	Server.POST("/donateBook", controller.DonateBook)

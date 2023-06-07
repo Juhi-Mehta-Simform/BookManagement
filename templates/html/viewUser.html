@@ -3,16 +3,28 @@
 <head>
     <meta charset="utf-8">
     <title>Book Management</title>
-<!--        <style>-->
-<!--            &lt;!&ndash;-->
-<!--                @import url("Project/css/dropdown.css");-->
-<!--            &ndash;&gt;-->
-<!--        </style>-->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://kit.fontawesome.com/b2a400ec90.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
 </head>
 <body>
-<h1>View Users</h1>
-<h3>{{.error}}</h3>
+{{$user := .user}}
+<header class="p-3 text" style="background-color: black">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+                <img height="40px" width="150px" src="/css/logo.png">
+            </a>
+            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+            </ul>
+            <div class="text-end">
+                <a href="/home "><button type="button" class="btn btn-outline-light me-2">Home</button></a>
+                <a href="/logout"><button type="button" class="btn btn-warning">Logout</button></a>
+            </div>
+        </div>
+    </div>
+</header>
 <form action="/search" method="POST">
     <input type="text" id="searchInput" name="query" placeholder="Search Here"><br>
     Filter by Role:
@@ -20,43 +32,59 @@
     <input type="checkbox" name="roles" id="roleFilter" value="{{.}}">{{.}}
     {{end}}
 </form><br><br>
-<div id="card">
-    {{if eq .user.RoleName "Admin"}}
-        {{range .users}}
-            {{if ne .UserID $.user.UserID}}
-                UserID: <span>{{.UserID}}</span><br>
-                Name: <span>{{.Name}}</span><br>
-                Email: <span>{{.Email}}</span><br>
-                Role: <span>{{.RoleName}}</span><br><br>
-                {{if eq .RoleName "Member"}}
-                    <a href="/borrowHistory/{{.UserID}}">View Borrow History</a>&nbsp;&nbsp;
-                    <a href="/donateHistory/{{.UserID}}">View Donate History</a><br><br>
-                    <a href="/makeLibrarian/{{.UserID}}">Make Librarian</a>&nbsp;&nbsp;
-                    <a href="/makeAdmin/{{.UserID}}">Make Admin</a>
-                {{else if eq .RoleName "Librarian"}}
-                    <a href="/makeAdmin/{{.UserID}}">Make Admin</a>
-                {{end}}
-                <p>-----------------------------------------------------------------</p>
+<div class="container-fluid">
+    <div class="container">
+        <div class="row justify-content-center" id="card">
+            {{range .users}}
+            {{if ne .UserID $user.UserID}}
+            <div class="col-xl-4 col-md-8 mb-3">
+                <div  class="card mb-2 shadow-sm h-100">
+                    <div class="card-body h-100">
+                        <div class="card-text d-flex flex-column justify-content-between h-100">
+                            <div class="">
+                                <table>
+                                    <tr>
+                                        <td class="align-top col-4">UserID: </td>
+                                        <td class="col-8">{{.UserID}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-4">Name: </td>
+                                        <td class="col-8">{{.Name}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-4">Email: </td>
+                                        <td class="col-8">{{.Email}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-4">Role: </td>
+                                        <td class="col-8">{{.RoleName}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="mx-auto mt-10">
+                                {{if eq .RoleName "Member"}}
+                                    <div class="mb-2">
+                                        <a href="/borrowHistory/{{.UserID}}" class="btn btn-warning">View Borrow History</a>&nbsp;&nbsp;
+                                        <a href="/donateHistory/{{.UserID}}" class="btn btn-warning">View Donate History</a>
+                                    </div>
+                                    {{if eq $user.RoleName "Admin"}}
+                                        <a href="/makeLibrarian/{{.UserID}}" class="btn btn-warning">Make Librarian</a>
+                                        <a href="/makeAdmin/{{.UserID}}" class="btn btn-warning">Make Admin</a>
+                                    {{end}}
+                                {{else if eq .RoleName "Librarian"}}
+                                    {{if eq $user.RoleName "Admin"}}
+                                        <a href="/makeAdmin/{{.UserID}}" class="btn btn-warning">Make Admin</a>
+                                    {{end}}
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {{end}}
-        {{end}}
-    {{else if eq .user.RoleName "Librarian"}}
-        {{range .users}}
-            {{if ne .UserID $.user.UserID}}
-                {{if ne .RoleName "Admin"}}
-                    UserID: <span>{{.UserID}}</span><br>
-                    Name: <span>{{.Name}}</span><br>
-                    Email: <span>{{.Email}}</span><br>
-                    Role: <span>{{.RoleName}}</span><br><br>
-                    {{if eq .RoleName "Member"}}
-                        <a href="/borrowHistory/{{.UserID}}">View Borrow History</a>&nbsp;&nbsp;
-                        <a href="/donateHistory/{{.UserID}}">View Donate History</a><br><br>
-                    {{end}}
-                    <p>-----------------------------------------------------------------</p>
-                {{end}}
             {{end}}
-        {{end}}
-    {{end}}
-    <a href="/home">Home</a>
+        </div>
+    </div>
 </div>
 </body>
 <script>

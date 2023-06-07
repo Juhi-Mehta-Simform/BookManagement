@@ -154,7 +154,6 @@ func LoadBorrow(ctx *gin.Context) {
 		db := connection.GetConnection().Where("id=?", id).Find(&book)
 		defer connection.CloseConnection(db)
 		db = connection.GetConnection().Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", borrow.MemberID, borrow.BookISBN).Find(&borrow)
-		fmt.Println(db.RowsAffected)
 		if db.RowsAffected != 0 {
 			//ctx.Set("error", "hello error")
 			ctx.Redirect(http.StatusFound, "/viewBook")
@@ -245,7 +244,7 @@ func UserBorrow(ctx *gin.Context) {
 		id := session.Get("userID").(int)
 		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", id).Find(&user)
 		defer connection.CloseConnection(db)
-		db = connection.GetConnection().Model(&models.Borrow{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.status, borrows.librarian_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList)
+		db = connection.GetConnection().Model(&models.Borrow{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.status, borrows.librarian_id, borrows.member_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList)
 		ctx.HTML(http.StatusOK, "viewBorrow.html", gin.H{
 			"member_id": id,
 			"borrow":    borrowList,
@@ -258,17 +257,16 @@ func UserBorrow(ctx *gin.Context) {
 
 func BorrowHistory(ctx *gin.Context) {
 	var borrowList []models.BorrowBook
-	var user models.User
+	today := time.Now().Format("2006-01-02")
 	session := sessions.Default(ctx)
 	if session.Get("userID") != nil {
 		id := ctx.Param("user_id")
-		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", id).Find(&user)
+		db := connection.GetConnection().Model(&models.Borrow{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.status, borrows.librarian_id, borrows.member_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList)
 		defer connection.CloseConnection(db)
-		db = connection.GetConnection().Model(&models.Borrow{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.status, borrows.librarian_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList)
 		ctx.HTML(http.StatusOK, "viewBorrow.html", gin.H{
 			"member_id": id,
 			"borrow":    borrowList,
-			"user":      user,
+			"today":     today,
 		})
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
@@ -339,7 +337,7 @@ func SearchBook(ctx *gin.Context) {
 	if session.Get("userID") != nil {
 		query := ctx.Query("query")
 		var books []models.Book
-		db := connection.GetConnection().Model(&models.Book{}).Where("title ILike ?  OR author ILike ?  OR genre ILike ?  OR isbn ILike ?", "%"+query+"%", "%"+query+"%", "%"+query+"%", "%"+query+"%").Order("id").Find(&books)
+		db := connection.GetConnection().Model(&models.Book{}).Where("title ILike ? OR isbn ILike ?", "%"+query+"%", "%"+query+"%").Order("id").Find(&books)
 		defer connection.CloseConnection(db)
 		ctx.JSON(http.StatusOK, books)
 	} else {

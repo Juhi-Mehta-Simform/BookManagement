@@ -3,11 +3,14 @@
 <head>
     <meta charset="utf-8">
     <title>Book Management</title>
-    <!--    <style>-->
-    <!--        &lt;!&ndash;-->
-    <!--            @import url("css/style.css");-->
-    <!--        &ndash;&gt;-->
-    <!--    </style>-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+    <style>
+        <!--
+        @import url("/css/profile.css");
+        -->
+    </style>
     <style>
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
@@ -20,20 +23,59 @@
     </style>
 </head>
 <body>
-<h1>Add Book</h1>
-<h3>{{.error}}</h3>
-<form action="/addBook" method="post" enctype="multipart/form-data"  autocomplete="off">
-    <input type="hidden" name="id"><br>
-    Title: <input type="text" name="title" required><br>
-    Author: <input type="text" name="author" required><br>
-    Genre: <input type="text" name="genre" required><br>
-    Description: <textarea name="description" required></textarea><br>
-    ISBN: <input type="number" name="isbn" required><br>
-    Total Quantity: <input type="number" name="total_quantity" id="tq" required onkeyup="copyValue()"><br>
-    Actual Quantity: <input type="number" name="actual_quantity" id="aq" required readonly><br>
-    <input type="submit" value="Submit">
-</form>
-<br><br>
+<header class="p-3 text" style="background-color: black">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+                <img height="40px" width="150px" src="/css/logo.png">
+            </a>
+            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+            </ul>
+            <div class="text-end">
+                <a href="/home "><button type="button" class="btn btn-outline-light me-2">Home</button></a>
+                <a href="/logout"><button type="button" class="btn btn-warning">Logout</button></a>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="w-100 h-100 d-flex flex-column justify-content-center align-item-center">
+    <div class="my-form bg-black">
+        <h1>Add New Book</h1>
+        <h5>{{.error}}</h5>
+        <form action="/addBook" method="post" autocomplete="off">
+            <input type="hidden" name="id">
+            <div class="mb-3 mt-4">
+                <label for="title" class="form-label">Title:</label>
+                <input type="text" name="title" id="title" class="form-control" required>
+            </div>
+            <div class="mb-3 mt-4">
+                <label for="author" class="form-label">Author:</label>
+                <input type="text" name="author" id="author" class="form-control" required>
+            </div>
+            <div class="mb-3 mt-4">
+                <label for="genre" class="form-label">Genre:</label>
+                <input type="text" name="genre" id="genre" class="form-control" required>
+            </div>
+            <div class="mb-3 mt-4">
+                <label for="description" class="form-label">Description:</label>
+                <textarea name="description" id="description" class="form-control" required></textarea>
+            </div>
+            <div class="mb-3 mt-4">
+                <label for="isbn" class="form-label">ISBN:</label>
+                <input type="number" name="isbn" id="isbn" class="form-control" required>
+            </div>
+            <div class="mb-3 mt-4">
+                <label for="tq" class="form-label">Total Quantity:</label>
+                <input type="number" name="total_quantity" id="tq" class="form-control" required onkeyup="copyValue()">
+            </div>
+            <div class="mb-3 mt-4">
+                <label for="aq" class="form-label">Available Quantity:</label>
+                <input type="number" name="actual_quantity" id="aq" class="form-control" required readonly>
+            </div>
+            <button type="submit" class="btn btn-warning" id="btn">Submit</button>
+        </form>
+    </div>
+</div>
 </body>
 <script>
     function copyValue() {
@@ -41,5 +83,4 @@
         document.getElementById("aq").value = input1Value;
     }
 </script>
-
 </html>
