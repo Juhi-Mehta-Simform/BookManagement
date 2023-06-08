@@ -70,12 +70,12 @@
         <textarea name="description" id="description" class="form-control" required>{{.book.Description}}</textarea>
       </div>
       <div class="mb-3 mt-4">
-        <label for="tq" class="form-label">Total Quantity:</label>
-        <input type="number" name="total_quantity" id="tq" class="form-control" value="{{.book.TotalQuantity}}" required  onkeyup="copyValue()" min=0>
+        <label for="aq" class="form-label">Available Quantity:</label>
+        <input type="number" name="actual_quantity" id="aq" class="form-control" value="{{.book.ActualQuantity}}" required onkeyup="copyValue()" min="1">
       </div>
       <div class="mb-3 mt-4">
-        <label for="aq" class="form-label">Available Quantity:</label>
-        <input type="number" name="actual_quantity" id="aq" class="form-control" value="{{.book.ActualQuantity}}" required readonly>
+        <label for="tq" class="form-label">Total Quantity:</label>
+        <input type="number" name="total_quantity" id="tq" class="form-control" value="{{.book.TotalQuantity}}" required readonly>
       </div>
       <button type="submit" class="btn btn-warning" id="btn">Submit</button>
     </form>
@@ -87,13 +87,9 @@
   function copyValue() {
     var val = {{.book.TotalQuantity}}
     var val2 = {{.book.ActualQuantity}}
-    var input1Value = document.getElementById("tq").value;
-    change = input1Value - val
-    if(change <= 0){
-      document.getElementById("aq").value = 0
-    }else{
-      document.getElementById("aq").value = val2 + change;
-    }
+    var input1Value = document.getElementById("aq").value;
+    var change = input1Value - val2;
+    document.getElementById("tq").value = val + change;
   }
 </script>
 </html>

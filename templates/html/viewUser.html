@@ -36,7 +36,7 @@
             <div class="input-group-prepend">
                 <button id="btn" type="button" class="btn btn-link text-warning"><i class="fa fa-search"></i></button>
             </div>
-            <input type="search" placeholder="Search Here" class="form-control border-0 bg-dark text-light rounded rounded-pill placeholder-color" id="searchInput" name="query">
+            <input type="text" placeholder="Search Here" class="form-control border-0 bg-dark text-light rounded rounded-pill placeholder-color" id="searchInput" name="query">
         </div>
     </div>
     <div class="p-1 rounded rounded-pill shadow-sm mb-2 mx-auto text-center" style="width: 50rem; background-color: lightgrey ">
@@ -81,15 +81,15 @@
                             <div class="mx-auto mt-10">
                                 {{if eq .RoleName "Member"}}
                                     {{if eq $user.RoleName "Admin"}}
-                                        <a href="/makeLibrarian/{{.UserID}}" class="btn btn-warning">Make Librarian</a>
+                                        <a href="/makeLibrarian/{{.UserID}}" class="btn btn-warning mb-2">Make Librarian</a>
                                         <a href="/makeAdmin/{{.UserID}}" class="btn btn-warning">Make Admin</a>
                                     {{else}}
-                                        <a href="/borrowHistory/{{.UserID}}" class="btn btn-warning">View Borrow History</a>
+                                        <a href="/borrowHistory/{{.UserID}}" class="btn btn-warning mb-2">View Borrow History</a>
                                         <a href="/donateHistory/{{.UserID}}" class="btn btn-warning">View Donate History</a>
                                     {{end}}
                                 {{else if eq .RoleName "Librarian"}}
                                     {{if eq $user.RoleName "Admin"}}
-                                        <a href="/removeLibrarian/{{.UserID}}" class="btn btn-warning">Remove Librarian</a>
+                                        <a href="/removeLibrarian/{{.UserID}}" class="btn btn-warning mb-2">Remove Librarian</a>
                                         <a href="/makeAdmin/{{.UserID}}" class="btn btn-warning">Make Admin</a>
                                     {{end}}
                                 {{end}}
@@ -134,14 +134,15 @@
             html += '<div class="mx-auto mt-10">';
             if (name["role_name"] == "Member") {
                 if(userName["role_name"]=="Admin"){
-                    html += '<a class="btn btn-warning me-1" href="/makeLibrarian/' + name["id"] + '">Make Librarian</a>';
+                    html += '<a class="btn btn-warning me-1 mb-2" href="/makeLibrarian/' + name["id"] + '">Make Librarian</a>';
                     html += '<a class="btn btn-warning" href="/makeAdmin/' + name["id"] + '">Make Admin</a>';
                 }else{
-                    html += '<a class="btn btn-warning me-1" href="/borrowHistory/' + name["id"] + '">View Borrow History</a>';
+                    html += '<a class="btn btn-warning me-1 mb-2" href="/borrowHistory/' + name["id"] + '">View Borrow History</a>';
                     html += '<a class="btn btn-warning" href="/donateHistory/' + name["id"] + '">View Donate History</a>';
                 }
             } else if (name["role_name"] == "Librarian") {
                 if(userName["role_name"]=="Admin"){
+                    html += '<a class="btn btn-warning mb-2" href="/removeLibrarian/' + name["id"] + '">Remove Librarian</a>';
                     html += '<a class="btn btn-warning" href="/makeAdmin/' + name["id"] + '">Make Admin</a>';
                 }
             }
