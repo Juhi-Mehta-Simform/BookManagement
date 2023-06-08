@@ -19,32 +19,27 @@
       </ul>
       <div class="text-end">
         <a href="/home "><button type="button" class="btn btn-outline-light me-2">Home</button></a>
-        {{if eq $user.RoleName "Librarian"}}
-        <a href="/addBook"><button type="button" class="btn btn-outline-light me-2">Add New Book</button></a>
-        {{else if eq $user.RoleName "Member"}}
-        <a href="/donateBook"><button type="button" class="btn btn-outline-light me-2">Donate a Book</button></a>
-        {{end}}
         <a href="/logout"><button type="button" class="btn btn-warning">Logout</button></a>
       </div>
     </div>
   </div>
 </header>
-<h3>{{.error}}</h3>
-<div class="container-fluid" id="card">
+{{$today := .today}}
+<div class="container-fluid mt-2" id="card">
   <div class="container">
     <div class="row justify-content-center">
-      {{range .donate}}
+      {{range .borrow}}
+      {{if ne .Status "Returned"}}
       <div class="col-xl-4 col-md-8 mb-3">
         <div  class="card mb-2 shadow-sm h-100">
           <div class="card-body h-100">
             <div class="card-text d-flex flex-column justify-content-between h-100">
+              <div class="">
                 <table>
-                  {{if ne $user.RoleName "Member"}}
                   <tr>
                     <td class="align-top col-6">User: </td>
                     <td class="col-6">{{.Name}}</td>
                   </tr>
-                  {{end}}
                   <tr>
                     <td class="align-top col-6">Title: </td>
                     <td class="col-6">{{.Title}}</td>
@@ -62,18 +57,30 @@
                     <td class="col-6">{{.BookISBN}}</td>
                   </tr>
                   <tr>
-                    <td class="align-top col-6">Date: </td>
-                    <td class="col-6">{{.DonateDate.Format "2006-01-02"}}</td>
+                    <td class="align-top col-6">Status: </td>
+                    <td class="col-6">{{.Status}}</td>
                   </tr>
                   <tr>
-                    <td class="align-top col-6">Quantity:</td>
-                    <td class="col-6">{{.Quantity}}</td>
+                    <td class="align-top col-6">IssueDate:</td>
+                    <td class="col-6">{{.IssueDate.Format "2006-01-02"}}</td>
+                  </tr>
+                  <tr>
+                    <td class="align-top col-6">DueDate:</td>
+                    <td class="col-6">{{.DueDate.Format "2006-01-02"}}</td>
                   </tr>
                 </table>
+              </div>
+              <div class="mx-auto w-5 mt-10">
+                {{$DueDate := .DueDate.Format "2006-01-02"}}
+                {{if lt $DueDate $today}}
+                <a href="/reminder/{{.MemberID}}" class="btn btn-warning">Send Reminder</a>
+                {{end}}
+              </div>
             </div>
           </div>
         </div>
       </div>
+      {{end}}
       {{end}}
     </div>
   </div>

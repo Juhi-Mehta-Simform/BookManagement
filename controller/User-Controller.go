@@ -1,15 +1,30 @@
 package controller
 
 import (
-	"Project/connection"
 	"Project/models"
-	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"strings"
 )
+
+func Home(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	var user models.User
+	if session.Get("userID") != nil {
+		id := session.Get("userID")
+		err := DB.Model(&models.User{}).Where("user_id = ?", id).Find(&user).Error
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, "not ok")
+		} else {
+			ctx.HTML(http.StatusOK, "home.html", gin.H{
+				"user": user,
+			})
+		}
+	} else {
+		ctx.Redirect(http.StatusMovedPermanently, "/")
+	}
+}
 
 func ViewUser(ctx *gin.Context) {
 	session := sessions.Default(ctx)
@@ -18,10 +33,9 @@ func ViewUser(ctx *gin.Context) {
 	var Roles []string
 	if session.Get("userID") != nil {
 		UserId := session.Get("userID")
-		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", UserId).Find(&user)
-		defer connection.CloseConnection(db)
-		err := connection.GetConnection().Model(&models.User{}).Order("user_id").Find(&users).Error
-		db = connection.GetConnection().Model(&models.User{}).Distinct("role_name").Find(&Roles)
+		DB.Model(&models.User{}).Where("user_id = ?", UserId).Find(&user)
+		err := DB.Model(&models.User{}).Order("user_id").Find(&users).Error
+		DB.Model(&models.User{}).Distinct("role_name").Find(&Roles)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
@@ -40,7 +54,18 @@ func MakeLibrarian(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	if session.Get("userID") != nil {
 		userId := ctx.Param("user_id")
-		connection.GetConnection().Debug().Model(&models.User{}).Where("user_id=?", userId).Update("role_name", "Librarian")
+		DB.Model(&models.User{}).Where("user_id=?", userId).Update("role_name", "Librarian")
+		ctx.Redirect(http.StatusFound, "/viewUser")
+	} else {
+		ctx.Redirect(http.StatusMovedPermanently, "/")
+	}
+}
+
+func RemoveLibrarian(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	if session.Get("userID") != nil {
+		userId := ctx.Param("user_id")
+		DB.Model(&models.User{}).Where("user_id=?", userId).Update("role_name", "Member")
 		ctx.Redirect(http.StatusFound, "/viewUser")
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
@@ -51,7 +76,7 @@ func MakeAdmin(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	if session.Get("userID") != nil {
 		userId := ctx.Param("user_id")
-		connection.GetConnection().Debug().Model(&models.User{}).Where("user_id=?", userId).Update("role_name", "Admin")
+		DB.Model(&models.User{}).Where("user_id=?", userId).Update("role_name", "Admin")
 		ctx.Redirect(http.StatusFound, "/viewUser")
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
@@ -60,11 +85,8 @@ func MakeAdmin(ctx *gin.Context) {
 
 func SearchUser(ctx *gin.Context) {
 	query := ctx.Query("query")
-	fmt.Println(query)
 	var users []models.User
-	db := connection.GetConnection().Model(&models.User{}).Where("name ILike ?", "%"+query+"%").Order("user_id").Find(&users)
-	defer connection.CloseConnection(db)
-	fmt.Println(users)
+	DB.Model(&models.User{}).Where("name ILike ?", "%"+query+"%").Order("user_id").Find(&users)
 	ctx.JSON(http.StatusOK, users)
 }
 
@@ -73,8 +95,7 @@ func GetUser(ctx *gin.Context) {
 	var user models.User
 	if session.Get("userID") != nil {
 		userId := session.Get("userID")
-		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", userId).Find(&user)
-		defer connection.CloseConnection(db)
+		DB.Model(&models.User{}).Where("user_id = ?", userId).Find(&user)
 		ctx.JSON(http.StatusOK, user)
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
@@ -86,8 +107,7 @@ func UserProfile(ctx *gin.Context) {
 	var user models.User
 	if session.Get("userID") != nil {
 		userId := session.Get("userID")
-		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", userId).Find(&user)
-		defer connection.CloseConnection(db)
+		DB.Model(&models.User{}).Where("user_id = ?", userId).Find(&user)
 		ctx.HTML(http.StatusOK, "viewProfile.html", gin.H{
 			"user": user,
 		})
@@ -101,8 +121,7 @@ func LoadProfile(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	if session.Get("userID") != nil {
 		id := ctx.Param("user_id")
-		db := connection.GetConnection().Where("user_id=?", id).Find(&user)
-		defer connection.CloseConnection(db)
+		DB.Where("user_id=?", id).Find(&user)
 		ctx.HTML(http.StatusOK, "updateProfile.html", gin.H{
 			"user_id": id,
 			"user":    user,
@@ -120,9 +139,7 @@ func UpdateProfile(ctx *gin.Context) {
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
-			fmt.Println(user)
-			db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id=?", user.UserID).Updates(&user)
-			defer connection.CloseConnection(db)
+			DB.Model(&models.User{}).Where("user_id=?", user.UserID).Updates(&user)
 			ctx.Redirect(http.StatusFound, "/viewProfile")
 		}
 	} else {
@@ -132,16 +149,14 @@ func UpdateProfile(ctx *gin.Context) {
 
 func FilterUser(ctx *gin.Context) {
 	session := sessions.Default(ctx)
-	var db *gorm.DB
 	var users []models.User
 	if session.Get("userID") != nil {
 		role := ctx.Query("role_name")
 		if len(role) != 0 && role != "" {
-			db = connection.GetConnection().Debug().Model(&models.User{}).Where("role_name IN (?)", strings.Split(role, ",")).Order("user_id").Find(&users)
+			DB.Model(&models.User{}).Where("role_name IN (?)", strings.Split(role, ",")).Order("user_id").Find(&users)
 		} else {
-			db = connection.GetConnection().Order("user_id").Find(&users)
+			DB.Order("user_id").Find(&users)
 		}
-		connection.CloseConnection(db)
 		ctx.JSON(http.StatusOK, users)
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")

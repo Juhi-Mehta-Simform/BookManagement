@@ -1,36 +1,16 @@
 package controller
 
 import (
-	"Project/connection"
 	"Project/models"
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"net/smtp"
 	"strconv"
 	"strings"
 	"time"
 )
-
-func Home(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	var user models.User
-	if session.Get("userID") != nil {
-		id := session.Get("userID")
-		err := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", id).Find(&user).Error
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, "not ok")
-		} else {
-			ctx.HTML(http.StatusOK, "home.html", gin.H{
-				"user": user,
-			})
-		}
-	} else {
-		ctx.Redirect(http.StatusMovedPermanently, "/")
-	}
-}
 
 func LoadBook(ctx *gin.Context) {
 	session := sessions.Default(ctx)
@@ -52,7 +32,7 @@ func CreateBook(ctx *gin.Context) {
 		book.ISBN = ctx.PostForm("isbn")
 		book.TotalQuantity, _ = strconv.Atoi(ctx.PostForm("total_quantity"))
 		book.ActualQuantity, _ = strconv.Atoi(ctx.PostForm("actual_quantity"))
-		err := connection.GetConnection().Create(&book).Error
+		err := DB.Create(&book).Error
 		if err != nil {
 			if strings.Contains(err.Error(), "duplicate") {
 				ctx.HTML(http.StatusBadRequest, "addBook.html", gin.H{
@@ -69,18 +49,17 @@ func CreateBook(ctx *gin.Context) {
 
 func ViewBook(ctx *gin.Context) {
 	session := sessions.Default(ctx)
-	//x, _ := ctx.Get("error")
 	var book []models.Book
 	var user models.User
 	var Authors []string
 	var Genres []string
+	data := ctx.Query("error")
 	if session.Get("userID") != nil {
 		userId := session.Get("userID")
-		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", userId).Find(&user)
-		defer connection.CloseConnection(db)
-		err := connection.GetConnection().Debug().Model(&models.Book{}).Order("id").Find(&book).Error
-		db = connection.GetConnection().Model(&models.Book{}).Distinct("genre").Find(&Genres)
-		db = connection.GetConnection().Model(&models.Book{}).Distinct("author").Find(&Authors)
+		DB.Model(&models.User{}).Where("user_id = ?", userId).Find(&user)
+		DB.Model(&models.Book{}).Distinct("genre").Find(&Genres)
+		DB.Model(&models.Book{}).Distinct("author").Find(&Authors)
+		err := DB.Model(&models.Book{}).Order("id").Find(&book).Error
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
@@ -89,7 +68,7 @@ func ViewBook(ctx *gin.Context) {
 				"user":    user,
 				"authors": Authors,
 				"genres":  Genres,
-				//"error":   x,
+				"error":   data,
 			})
 		}
 	} else {
@@ -102,8 +81,7 @@ func LoadUpdate(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	if session.Get("userID") != nil {
 		id := ctx.Param("id")
-		db := connection.GetConnection().Where("id=?", id).Find(&book)
-		defer connection.CloseConnection(db)
+		DB.Where("id=?", id).Find(&book)
 		ctx.HTML(http.StatusOK, "updateBook.html", gin.H{
 			"id":   id,
 			"book": book,
@@ -121,8 +99,7 @@ func UpdateBook(ctx *gin.Context) {
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
-			db := connection.GetConnection().Model(&models.Book{}).Where("id=?", book.ID).Updates(&book)
-			defer connection.CloseConnection(db)
+			DB.Model(&models.Book{}).Where("id=?", book.ID).Updates(&book)
 			ctx.Redirect(http.StatusFound, "/viewBook")
 		}
 	} else {
@@ -135,8 +112,7 @@ func DeleteBook(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	if session.Get("userID") != nil {
 		id := ctx.Param("id")
-		db := connection.GetConnection().Where("id=?", id).Delete(&book)
-		defer connection.CloseConnection(db)
+		DB.Where("id=?", id).Delete(&book)
 		ctx.Redirect(http.StatusFound, "/viewBook")
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
@@ -151,12 +127,10 @@ func LoadBorrow(ctx *gin.Context) {
 		borrow.MemberID = session.Get("userID").(int)
 		borrow.BookISBN = ctx.Param("isbn")
 		id := ctx.Param("id")
-		db := connection.GetConnection().Where("id=?", id).Find(&book)
-		defer connection.CloseConnection(db)
-		db = connection.GetConnection().Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", borrow.MemberID, borrow.BookISBN).Find(&borrow)
+		DB.Where("id=?", id).Find(&book)
+		db := DB.Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", borrow.MemberID, borrow.BookISBN).Find(&borrow)
 		if db.RowsAffected != 0 {
-			//ctx.Set("error", "hello error")
-			ctx.Redirect(http.StatusFound, "/viewBook")
+			ctx.Redirect(http.StatusFound, "/viewBook?error=You already borrowed this book.")
 		} else {
 			ctx.HTML(http.StatusOK, "borrowBook.html", gin.H{
 				"id":   id,
@@ -179,13 +153,12 @@ func BorrowBook(ctx *gin.Context) {
 		borrow.IssueDate, _ = time.Parse("2006-01-02", ctx.PostForm("issue_date"))
 		borrow.DueDate, _ = time.Parse("2006-01-02", ctx.PostForm("due_date"))
 		borrow.Status = ctx.PostForm("status")
-		db := connection.GetConnection().Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", borrow.MemberID, borrow.BookISBN).Find(&borrow)
-		defer connection.CloseConnection(db)
+		db := DB.Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", borrow.MemberID, borrow.BookISBN).Find(&borrow)
 		if db.RowsAffected == 0 {
-			db = connection.GetConnection().Where("isbn=?", borrow.BookISBN).Find(&book)
-			db = connection.GetConnection().Create(&borrow)
+			DB.Where("isbn=?", borrow.BookISBN).Find(&book)
+			DB.Create(&borrow)
 			newQuantity := book.ActualQuantity - 1
-			db = connection.GetConnection().Model(&models.Book{}).Where("isbn=?", borrow.BookISBN).Update("actual_quantity", newQuantity)
+			DB.Model(&models.Book{}).Where("isbn=?", borrow.BookISBN).Update("actual_quantity", newQuantity)
 			ctx.Redirect(http.StatusFound, "/userBorrow")
 		}
 	} else {
@@ -200,13 +173,12 @@ func ViewBorrow(ctx *gin.Context) {
 	today := time.Now().Format("2006-01-02")
 	if session.Get("userID") != nil {
 		id := session.Get("userID").(int)
-		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", id).Find(&user)
-		defer connection.CloseConnection(db)
-		err := connection.GetConnection().Debug().Model(&models.Borrow{}).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.member_id, borrows.status, borrows.librarian_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList).Error
+		DB.Model(&models.User{}).Where("user_id = ?", id).Find(&user)
+		err := DB.Model(&models.Borrow{}).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, u.name, borrows.status, borrows.librarian_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn JOIN users AS u on borrows.member_id=u.user_id").Order("status, borrow_id").Find(&borrowList).Error
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
-			ctx.HTML(http.StatusOK, "viewBorrow.html", gin.H{
+			ctx.HTML(http.StatusOK, "allBorrow.html", gin.H{
 				"borrow": borrowList,
 				"user":   user,
 				"today":  today,
@@ -221,9 +193,7 @@ func ViewRequest(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	var borrowList []models.BorrowBook
 	if session.Get("userID") != nil {
-		db := connection.GetConnection()
-		defer connection.CloseConnection(db)
-		err := connection.GetConnection().Debug().Model(&models.Borrow{}).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.member_id, borrows.status, borrows.librarian_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList).Error
+		err := DB.Model(&models.Borrow{}).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.member_id, borrows.status, borrows.librarian_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList).Error
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
@@ -242,9 +212,8 @@ func UserBorrow(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	if session.Get("userID") != nil {
 		id := session.Get("userID").(int)
-		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", id).Find(&user)
-		defer connection.CloseConnection(db)
-		db = connection.GetConnection().Model(&models.Borrow{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.status, borrows.librarian_id, borrows.member_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList)
+		DB.Model(&models.User{}).Where("user_id = ?", id).Find(&user)
+		DB.Model(&models.Borrow{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.status, borrows.librarian_id, borrows.member_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList)
 		ctx.HTML(http.StatusOK, "viewBorrow.html", gin.H{
 			"member_id": id,
 			"borrow":    borrowList,
@@ -261,8 +230,7 @@ func BorrowHistory(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	if session.Get("userID") != nil {
 		id := ctx.Param("user_id")
-		db := connection.GetConnection().Model(&models.Borrow{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.status, borrows.librarian_id, borrows.member_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList)
-		defer connection.CloseConnection(db)
+		DB.Model(&models.Borrow{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.status, borrows.librarian_id, u.name").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn JOIN users AS u on borrows.member_id=u.user_id").Order("status, borrow_id").Find(&borrowList)
 		ctx.HTML(http.StatusOK, "viewBorrow.html", gin.H{
 			"member_id": id,
 			"borrow":    borrowList,
@@ -279,9 +247,7 @@ func LoadReturn(ctx *gin.Context) {
 	if session.Get("userID") != nil {
 		id := session.Get("userID").(int)
 		isbn := ctx.Param("book_isbn")
-		db := connection.GetConnection().Debug().Where("member_id=? AND book_isbn=?", id, isbn).Find(&borrow)
-		fmt.Println(isbn)
-		defer connection.CloseConnection(db)
+		DB.Where("member_id=? AND book_isbn=?", id, isbn).Find(&borrow)
 		ctx.HTML(http.StatusOK, "returnBook.html", gin.H{
 			"member_id": id,
 			"borrow":    borrow,
@@ -299,11 +265,10 @@ func ReturnBook(ctx *gin.Context) {
 		borrow.BookISBN = ctx.PostForm("book_isbn")
 		borrow.DueDate, _ = time.Parse("2006-01-02", ctx.PostForm("due_date"))
 		borrow.Status = ctx.PostForm("status")
-		db := connection.GetConnection().Debug().Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", borrow.MemberID, borrow.BookISBN).Find(&borrow)
-		defer connection.CloseConnection(db)
+		db := DB.Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", borrow.MemberID, borrow.BookISBN).Find(&borrow)
 		if db.RowsAffected != 0 {
-			newStatus := "requested"
-			db = connection.GetConnection().Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", borrow.MemberID, borrow.BookISBN).Update("status", newStatus)
+			newStatus := "Requested"
+			DB.Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", borrow.MemberID, borrow.BookISBN).Update("status", newStatus)
 			ctx.Redirect(http.StatusFound, "/userBorrow")
 		} else {
 			ctx.JSON(http.StatusForbidden, "not ok")
@@ -321,12 +286,11 @@ func ReturnRequest(ctx *gin.Context) {
 		memberId := ctx.Param("member_id")
 		LibrarianId := session.Get("userID")
 		isbn := ctx.Param("book_isbn")
-		db := connection.GetConnection().Debug().Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", memberId, isbn).Find(&borrow)
-		defer connection.CloseConnection(db)
-		db = connection.GetConnection().Debug().Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", memberId, isbn).Updates(map[string]interface{}{"status": "Returned", "librarian_id": LibrarianId})
-		db = connection.GetConnection().Where("isbn=?", borrow.BookISBN).Find(&book)
+		DB.Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", memberId, isbn).Find(&borrow)
+		DB.Model(&models.Borrow{}).Where("member_id=? AND book_isbn=?", memberId, isbn).Updates(map[string]interface{}{"status": "Returned", "librarian_id": LibrarianId})
+		DB.Where("isbn=?", borrow.BookISBN).Find(&book)
 		newQuantity := book.ActualQuantity + 1
-		db = connection.GetConnection().Model(&models.Book{}).Where("isbn=?", borrow.BookISBN).Update("actual_quantity", newQuantity)
+		DB.Model(&models.Book{}).Where("isbn=?", borrow.BookISBN).Update("actual_quantity", newQuantity)
 		ctx.Redirect(http.StatusFound, "/userBorrow")
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
@@ -337,8 +301,7 @@ func SearchBook(ctx *gin.Context) {
 	if session.Get("userID") != nil {
 		query := ctx.Query("query")
 		var books []models.Book
-		db := connection.GetConnection().Model(&models.Book{}).Where("title ILike ? OR isbn ILike ?", "%"+query+"%", "%"+query+"%").Order("id").Find(&books)
-		defer connection.CloseConnection(db)
+		DB.Model(&models.Book{}).Where("title ILike ? OR isbn ILike ?", "%"+query+"%", "%"+query+"%").Order("id").Find(&books)
 		ctx.JSON(http.StatusOK, books)
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
@@ -347,14 +310,12 @@ func SearchBook(ctx *gin.Context) {
 
 func FilterBook(ctx *gin.Context) {
 	session := sessions.Default(ctx)
-	var db *gorm.DB
 	var books []models.Book
 	var authorQuery string
 	var genreQuery string
 	if session.Get("userID") != nil {
 		genre := ctx.Query("genres")
 		author := ctx.Query("authors")
-		fmt.Println(author)
 		if len(author) != 0 && author != "" {
 			tempAuthor := strings.Split(author, ",")
 			authorQuery = "author IN ('" + strings.Join(tempAuthor, "','") + "')"
@@ -366,8 +327,7 @@ func FilterBook(ctx *gin.Context) {
 			tempGenre := strings.Split(genre, ",")
 			genreQuery += "genre IN ('" + strings.Join(tempGenre, "','") + "')"
 		}
-		db = connection.GetConnection().Debug().Model(&models.Book{}).Where(authorQuery + genreQuery).Order("id").Find(&books)
-		connection.CloseConnection(db)
+		DB.Model(&models.Book{}).Where(authorQuery + genreQuery).Order("id").Find(&books)
 		ctx.JSON(http.StatusOK, books)
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
@@ -379,8 +339,7 @@ func LoadDonate(ctx *gin.Context) {
 	var user models.User
 	if session.Get("userID") != nil {
 		id := session.Get("userID")
-		db := connection.GetConnection().Where("user_id=?", id).Find(&user)
-		defer connection.CloseConnection(db)
+		DB.Where("user_id=?", id).Find(&user)
 		ctx.HTML(http.StatusOK, "donateBook.html", gin.H{
 			"id": id,
 		})
@@ -402,19 +361,18 @@ func DonateBook(ctx *gin.Context) {
 		author := ctx.PostForm("author")
 		genre := ctx.PostForm("genre")
 		description := ctx.PostForm("description")
-		db := connection.GetConnection().Model(&models.Book{}).Where("isbn=?", donate.BookISBN).Find(&book)
-		defer connection.CloseConnection(db)
+		db := DB.Model(&models.Book{}).Where("isbn=?", donate.BookISBN).Find(&book)
 		if db.RowsAffected > 0 {
-			db = connection.GetConnection().Where("isbn=?", donate.BookISBN).Find(&book)
-			db = connection.GetConnection().Create(&donate)
+			DB.Where("isbn=?", donate.BookISBN).Find(&book)
+			DB.Create(&donate)
 			newTotalQuantity := book.TotalQuantity + donate.Quantity
 			newQuantity := book.ActualQuantity + donate.Quantity
-			db = connection.GetConnection().Model(&models.Book{}).Where("isbn=?", donate.BookISBN).Updates(map[string]interface{}{"total_quantity": newTotalQuantity, "actual_quantity": newQuantity})
+			DB.Model(&models.Book{}).Where("isbn=?", donate.BookISBN).Updates(map[string]interface{}{"total_quantity": newTotalQuantity, "actual_quantity": newQuantity})
 			ctx.Redirect(http.StatusFound, "/userDonate")
 		} else {
 			newBook := models.Book{Title: title, Author: author, Genre: genre, Description: description, ISBN: donate.BookISBN, TotalQuantity: donate.Quantity, ActualQuantity: donate.Quantity}
-			db = connection.GetConnection().Create(&newBook)
-			db = connection.GetConnection().Create(&donate)
+			DB.Create(&newBook)
+			DB.Create(&donate)
 			ctx.Redirect(http.StatusFound, "/userDonate")
 		}
 	} else {
@@ -428,9 +386,8 @@ func UserDonate(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	if session.Get("userID") != nil {
 		id := session.Get("userID").(int)
-		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", id).Find(&user)
-		defer connection.CloseConnection(db)
-		db = connection.GetConnection().Model(&models.Donate{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity").Joins("JOIN books AS b ON donates.book_isbn = b.isbn").Order("donate_id").Scan(&donateList)
+		DB.Model(&models.User{}).Where("user_id = ?", id).Find(&user)
+		DB.Model(&models.Donate{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity").Joins("JOIN books AS b ON donates.book_isbn = b.isbn").Order("donate_id").Scan(&donateList)
 		ctx.HTML(http.StatusOK, "viewDonate.html", gin.H{
 			"member_id": id,
 			"donate":    donateList,
@@ -447,9 +404,8 @@ func ViewDonate(ctx *gin.Context) {
 	var user models.User
 	if session.Get("userID") != nil {
 		id := session.Get("userID").(int)
-		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", id).Find(&user)
-		defer connection.CloseConnection(db)
-		err := connection.GetConnection().Debug().Model(&models.Donate{}).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity, donates.member_id").Joins("JOIN books AS b ON donates.book_isbn = b.isbn").Order("donate_id").Scan(&donateList).Error
+		DB.Model(&models.User{}).Where("user_id = ?", id).Find(&user)
+		err := DB.Model(&models.Donate{}).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity, u.name").Joins("JOIN books AS b ON donates.book_isbn = b.isbn JOIN users AS u on donates.member_id=u.user_id").Order("donate_id").Scan(&donateList).Error
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
@@ -469,13 +425,11 @@ func DonateHistory(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	if session.Get("userID") != nil {
 		id := ctx.Param("user_id")
-		db := connection.GetConnection().Debug().Model(&models.User{}).Where("user_id = ?", id).Find(&user)
-		defer connection.CloseConnection(db)
-		db = connection.GetConnection().Model(&models.Donate{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity").Joins("JOIN books AS b ON donates.book_isbn = b.isbn").Order("donate_id").Scan(&donateList)
+		DB.Model(&models.User{}).Where("user_id = ?", id).Find(&user)
+		DB.Model(&models.Donate{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity, u.name").Joins("JOIN books AS b ON donates.book_isbn = b.isbn JOIN users AS u on donates.member_id=u.user_id").Order("donate_id").Scan(&donateList)
 		ctx.HTML(http.StatusOK, "viewDonate.html", gin.H{
 			"member_id": id,
 			"donate":    donateList,
-			"user":      user,
 		})
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
@@ -514,10 +468,7 @@ func SendReminder(email string) error {
 func Reminder(ctx *gin.Context) {
 	var email string
 	id := ctx.Param("member_id")
-	db := connection.GetConnection().Model(&models.User{}).Where("user_id", id).Select("email").Find(&email)
-	connection.CloseConnection(db)
+	DB.Model(&models.User{}).Where("user_id", id).Select("email").Find(&email)
 	SendReminder(email)
-	ctx.HTML(http.StatusOK, "home.html", gin.H{
-		"error": "Reminder sent.",
-	})
+	ctx.Redirect(http.StatusFound, "/home")
 }

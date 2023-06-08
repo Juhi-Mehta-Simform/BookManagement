@@ -38,6 +38,7 @@ func init() {
 	Server.GET("/returnRequest/:member_id/:book_isbn", controller.ReturnRequest)
 	Server.POST("/returnBook", controller.ReturnBook)
 	Server.GET("/makeLibrarian/:user_id", controller.MakeLibrarian)
+	Server.GET("/removeLibrarian/:user_id", controller.RemoveLibrarian)
 	Server.GET("/makeAdmin/:user_id", controller.MakeAdmin)
 	Server.POST("/search", controller.SearchUser)
 	Server.POST("/searchBook", controller.SearchBook)

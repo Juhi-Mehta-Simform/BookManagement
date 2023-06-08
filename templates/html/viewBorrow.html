@@ -10,10 +10,11 @@
 </head>
 <body>
 {{$user := .user}}
+{{$today := .today}}
 <header class="p-3 text" style="background-color: black">
     <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+            <a class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
                 <img height="40px" width="150px" src="/css/logo.png">
             </a>
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
@@ -26,47 +27,80 @@
     </div>
 </header>
 <h3>{{.error}}</h3>
-
-{{if eq .user.RoleName "Member"}}
-  {{range .borrow}}
-    Title: <span>{{.Title}}</span><br>
-    Author: <span>{{.Author}}</span><br>
-    Genre: <span>{{.Genre}}</span><br>
-    ISBN: <span>{{.BookISBN}}</span><br>
-    Status: <span>{{.Status}}</span><br>
-    IssueDate: <span>{{.IssueDate.Format "2006-01-02"}}</span><br>
-    DueDate: <span>{{.DueDate.Format "2006-01-02"}}</span><br>
-    {{if eq .Status "pending"}}
-    <a href="/loadReturn/{{.BookISBN}}">Return</a><br>
-    {{else if eq .Status "Returned"}}
-    Returned To(LibrarianID): <span>{{.LibrarianID}}</span>
-    {{end}}
-    <p>-----------------------------------------------------------------</p>
-  {{end}}
-{{else}}
-{{ $today := .today}}
-    {{range .borrow}}
-        MemberID: <span>{{.MemberID}}</span><br>
-        Title: <span>{{.Title}}</span><br>
-        Author: <span>{{.Author}}</span><br>
-        Genre: <span>{{.Genre}}</span><br>
-        ISBN: <span>{{.BookISBN}}</span><br>
-        Status: <span>{{.Status}}</span><br>
-        IssueDate: <span>{{.IssueDate.Format "2006-01-02"}}</span><br>
-        DueDate: <span>{{.DueDate.Format "2006-01-02"}}</span><br>
-        {{if eq .Status "requested"}}
-            <a href="/returnRequest/{{.MemberID}}/{{.BookISBN}}">Accept Return Request</a><br>
-        {{else if eq .Status "Returned"}}
-            Returned To(LibrarianID): <span>{{.LibrarianID}}</span>
-        {{end}}
-        {{$DueDate := .DueDate.Format "2006-01-02"}}
-        {{if lt $DueDate $today}}
-            <a href="/reminder/{{.MemberID}}">Send Reminder</a>
-        {{end}}
-        <p>-----------------------------------------------------------------</p>
-    {{end}}
-{{end}}
-<a href="/home">Home</a><br>
-<a href="/viewBook">View all books</a>
+<div class="container-fluid" id="card">
+    <div class="container">
+        <div class="row justify-content-center">
+            {{range .borrow}}
+            <div class="col-xl-4 col-md-8 mb-3">
+                <div  class="card mb-2 shadow-sm h-100">
+                    <div class="card-body h-100">
+                        <div class="card-text d-flex flex-column justify-content-between h-100">
+                            <div class="">
+                                <table>
+                                    {{if ne $user.RoleName "Member"}}
+                                    <tr>
+                                        <td class="align-top col-6">User: </td>
+                                        <td class="col-6">{{.Name}}</td>
+                                    </tr>
+                                    {{end}}
+                                    <tr>
+                                        <td class="align-top col-6">Title: </td>
+                                        <td class="col-6">{{.Title}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-6">Author: </td>
+                                        <td class="col-6">{{.Author}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-6">Genre: </td>
+                                        <td class="col-6">{{.Genre}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-6">ISBN: </td>
+                                        <td class="col-6">{{.BookISBN}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-6">Status: </td>
+                                        <td class="col-6">{{.Status}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-6">IssueDate:</td>
+                                        <td class="col-6">{{.IssueDate.Format "2006-01-02"}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-top col-6">DueDate:</td>
+                                        <td class="col-6">{{.DueDate.Format "2006-01-02"}}</td>
+                                    </tr>
+                                    {{if eq .Status "Returned"}}
+                                    <tr>
+                                        <td class="align-top col-6">ReturnedTo:</td>
+                                        <td class="col-6">{{.LibrarianID}}</td>
+                                    </tr>
+                                    {{end}}
+                                </table>
+                            </div>
+                            <div class="mx-auto w-5 mt-10">
+                                {{if eq $user.RoleName "Member"}}
+                                    {{if eq .Status "Pending"}}
+                                        <a href="/loadReturn/{{.BookISBN}}" class="btn btn-warning">Return</a>
+                                    {{end}}
+                                {{else if eq $user.RoleName "Librarian"}}
+                                    {{if eq .Status "Requested"}}
+                                         <a href="/returnRequest/{{.MemberID}}/{{.BookISBN}}" class="btn btn-warning">Accept Return Request</a>
+                                    {{end}}
+                                    {{$DueDate := .DueDate.Format "2006-01-02"}}
+                                    {{if lt $DueDate $today}}
+                                        <a href="/reminder/{{.MemberID}}" class="btn btn-warning">Send Reminder</a>
+                                    {{end}}
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</div>
 </body>
 </html>

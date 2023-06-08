@@ -48,6 +48,7 @@ type Donate struct {
 
 type BorrowBook struct {
 	MemberID    int
+	Name        string
 	LibrarianID int
 	Title       string
 	Genre       string
@@ -60,6 +61,7 @@ type BorrowBook struct {
 
 type DonateBook struct {
 	MemberID   int
+	Name       string
 	Title      string
 	Genre      string
 	Author     string

@@ -2,14 +2,14 @@ package main
 
 import (
 	"Project/connection"
+	"Project/controller"
 	"Project/models"
 	"Project/router"
 )
 
 func main() {
-	db := connection.GetConnection()
 	//db.Migrator().DropTable(&models.Donate{}, models.User{}, &models.Borrow{}, &models.Book{})
-	db.AutoMigrate(&models.Donate{}, &models.User{}, &models.Book{}, &models.Borrow{})
-	defer connection.CloseConnection(db)
+	controller.DB.AutoMigrate(&models.Donate{}, &models.User{}, &models.Book{}, &models.Borrow{})
+	defer connection.CloseConnection(controller.DB)
 	router.Server.Run()
 }

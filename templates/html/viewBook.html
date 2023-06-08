@@ -7,13 +7,19 @@
     <script src="https://kit.fontawesome.com/b2a400ec90.js" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+    <style>
+        <!--
+        @import url("/css/search.css");
+        -->
+    </style>
 </head>
 <body>
 {{$user := .user}}
+{{$error := .error}}
 <header class="p-3 text" style="background-color: black">
     <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+            <a class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
                 <img height="40px" width="150px" src="/css/logo.png">
             </a>
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
@@ -28,21 +34,38 @@
         </div>
     </div>
 </header>
-<form action="/searchBook" method="POST">
-    <input type="text" id="searchInput" name="query" placeholder="Search Here"><br>
+<form action="/searchBook" method="POST" autocomplete="off">
+    <div class="p-1 bg-dark rounded rounded-pill shadow-sm mt-4 mb-2 mx-auto" style="width: 50rem;">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <button id="btn" type="button" class="btn btn-link text-warning"><i class="fa fa-search"></i></button>
+            </div>
+            <input type="text" placeholder="Search Here" class="form-control border-0 bg-dark rounded rounded-pill text-light placeholder-color"  id="searchInput" name="query" >
+        </div>
+    </div>
+    <div class="p-1 rounded rounded-pill shadow-sm mb-2 mx-auto text-center" style="width: 50rem; background-color: lightgrey ">
     Filter by Genre:
     {{range .genres}}
-    <input type="checkbox" name="genres" id="genreFilter" value="{{.}}">{{.}}
+        <fieldset class="d-inline">
+            <input type="checkbox" name="genres" id="{{.}}" value="{{.}}">
+            <label for="{{.}}">{{.}}</label>
+        </fieldset>
     {{end}}
-    <br>
+    </div>
+    <div class="p-1 rounded rounded-pill shadow-sm mx-auto text-center" style="width: 50rem; background-color: lightgrey ">
     Filter by Author:
     {{range .authors}}
-         <input type="checkbox" name="authors" id="authorFilter" value="{{.}}">{{.}}
+        <fieldset class="d-inline">
+            <input type="checkbox" name="authors" id="{{.}}" value="{{.}}">
+            <label for="{{.}}">{{.}}</label>
+        </fieldset>
     {{end}}
+    </div>
 </form><br><br>
 <div class="container-fluid">
         <div class="container">
             <div class="row justify-content-center" id="card">
+                <h3 class="text-center text-danger">{{$error}}</h3>
                 {{range .book}}
                 <div class="col-xl-4 col-md-8 mb-3">
                     <div  class="card mb-2 shadow-sm h-100">
@@ -165,7 +188,7 @@
             var html = "";
             data.forEach(function (name) {
                 [dataUser].forEach(function(userName) {
-                   html += Add(html, name, userName)
+                   html = Add(html, name, userName)
                 });
             });
             $("#card").append(html)
@@ -193,7 +216,7 @@
                     for (var i = 0; i < books.length; i++) {
                         [dataUser].forEach(function (userName) {
                             var name = books[i];
-                            html += Add(html, name, userName)
+                            html = Add(html, name, userName)
                         });
                     }
                     $("#card").append(html)

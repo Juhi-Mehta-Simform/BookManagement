@@ -7,10 +7,18 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+	"log"
 	"net/http"
 	"net/smtp"
 	"strings"
 )
+
+var DB *gorm.DB
+
+func init() {
+	DB = connection.GetConnection()
+}
 
 func LoadSignup(ctx *gin.Context) {
 	ctx.HTML(http.StatusOK, "signup.html", nil)
@@ -27,7 +35,7 @@ func Signup(ctx *gin.Context) {
 	user.Email = ctx.PostForm("email")
 	user.Password = ctx.PostForm("password")
 	user.Gender = ctx.PostForm("gender")
-	err := connection.GetConnection().Create(&user).Error
+	err := DB.Create(&user).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate") {
 			ctx.HTML(http.StatusBadRequest, "signup.html", gin.H{
@@ -44,9 +52,9 @@ func Login(ctx *gin.Context) {
 	var user models.User
 	email := ctx.PostForm("email")
 	password := ctx.PostForm("password")
-	connection.GetConnection().Debug().Model(&models.User{}).Where("email=?", email).Find(&user)
+	DB.Model(&models.User{}).Where("email=?", email).Find(&user)
 	if user.UserID != 0 {
-		db := connection.GetConnection().Debug().Model(&models.User{}).Where("email=? AND password=?", email, password).Find(&user)
+		db := DB.Model(&models.User{}).Where("email=? AND password=?", email, password).Find(&user)
 		if db.RowsAffected == 0 {
 			ctx.HTML(http.StatusBadRequest, "login.html", gin.H{
 				"error": "Incorrect Password",
@@ -77,8 +85,7 @@ func LoadForget(ctx *gin.Context) {
 func ForgetPassword(ctx *gin.Context) {
 	var user models.User
 	email := ctx.PostForm("email")
-	db := connection.GetConnection().Model(&models.User{}).Where("email=?", email).Find(&user)
-	connection.CloseConnection(db)
+	db := DB.Model(&models.User{}).Where("email=?", email).Find(&user)
 	if db.RowsAffected == 0 {
 		ctx.HTML(http.StatusForbidden, "forgetPassword.html", gin.H{
 			"error": "user not found",
@@ -117,7 +124,7 @@ func sendResetPasswordEmail(email string) {
 		[]byte(msg),
 	)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 }
@@ -126,7 +133,7 @@ func LoadReset(ctx *gin.Context) {
 	var user models.User
 	email := ctx.Query("email")
 	var userId int
-	db := connection.GetConnection().Model(&models.User{}).Select("user_id, email").Find(&users)
+	DB.Model(&models.User{}).Select("user_id, email").Find(&users)
 	for i, _ := range users {
 		err := bcrypt.CompareHashAndPassword([]byte(email), []byte(users[i].Email))
 		if err == nil {
@@ -134,10 +141,7 @@ func LoadReset(ctx *gin.Context) {
 			break
 		}
 	}
-	fmt.Println(email)
-	fmt.Println(userId)
-	db = connection.GetConnection().Where("user_id=?", userId).Find(&user)
-	connection.CloseConnection(db)
+	DB.Where("user_id=?", userId).Find(&user)
 	ctx.HTML(http.StatusOK, "resetPassword.html", gin.H{
 		"user": user,
 	})
@@ -146,8 +150,7 @@ func LoadReset(ctx *gin.Context) {
 func ResetPassword(ctx *gin.Context) {
 	email := ctx.PostForm("email")
 	password := ctx.PostForm("password")
-	db := connection.GetConnection().Debug().Model(&models.User{}).Where("email=?", email).Update("password", password)
-	connection.CloseConnection(db)
+	DB.Model(&models.User{}).Where("email=?", email).Update("password", password)
 	ctx.HTML(http.StatusOK, "login.html", gin.H{
 		"error": "password is reset.",
 	})

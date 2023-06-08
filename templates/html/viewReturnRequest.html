@@ -12,7 +12,7 @@
 <header class="p-3 text" style="background-color: black">
   <div class="container">
     <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-      <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+      <a class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
         <img height="40px" width="150px" src="/css/logo.png">
       </a>
       <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
@@ -25,11 +25,11 @@
   </div>
 </header>
 <h3>{{.error}}</h3>
-<div class="container-fluid" id="card">
+<div class="container-fluid mt-2" id="card">
   <div class="container">
     <div class="row justify-content-center">
       {{range .borrow}}
-      {{if eq .Status "requested"}}
+      {{if eq .Status "Requested"}}
       <div class="col-xl-4 col-md-8 mb-3">
         <div  class="card mb-2 shadow-sm h-100">
           <div class="card-body h-100">
@@ -37,8 +37,8 @@
               <div class="">
                 <table>
                   <tr>
-                    <td class="align-top col-6">MemberID: </td>
-                    <td class="col-6">{{.MemberID}}</td>
+                    <td class="align-top col-6">User: </td>
+                    <td class="col-6">{{.Name}}</td>
                   </tr>
                   <tr>
                     <td class="align-top col-6">Title: </td>

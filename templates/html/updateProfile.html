@@ -35,7 +35,7 @@
 <header class="p-3 text" style="background-color: black">
     <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+            <a class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
                 <img height="40px" width="150px" src="/css/logo.png">
             </a>
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
@@ -68,9 +68,14 @@
         </div>
         <div class="mb-3 mt-4">
             Gender:
-            <input type="radio" name="gender" value="Male">Male
-            <input type="radio" name="gender" value="Female">Female
-            <input type="radio" name="gender" value="Custom">Custom<br><br>
+            <fieldset class="d-inline">
+                <input type="radio" name="gender" value="Male" id="Male">
+                <label for="Male">Male</label>
+            </fieldset>
+            <fieldset class="d-inline">
+                <input type="radio" name="gender" value="Female" id="Female">
+                <label for="Female">Female</label>
+            </fieldset>
         </div>
         <button type="submit" class="btn btn-warning" id="btn">Submit</button>
         </form>
@@ -78,5 +83,6 @@
 </div>
 </body>
 <script>
+    $("#"+ {{.user.Gender}}).prop("checked", true);
 </script>
 </html>

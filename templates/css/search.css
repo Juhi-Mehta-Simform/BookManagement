@@ -1,0 +1,16 @@
+.form-control:focus {
+    box-shadow: none;
+    outline: none;
+}
+.form-control-underlined {
+    border-width: 0;
+    border-bottom-width: 1px;
+    border-radius: 0;
+    padding-left: 0;
+}
+.placeholder-color::placeholder {
+    color: white; /* Replace with your desired color */
+}
+#btn{
+    cursor: auto;
+}

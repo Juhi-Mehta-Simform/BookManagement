@@ -35,7 +35,7 @@
 <header class="p-3 text" style="background-color: black">
   <div class="container">
     <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-      <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+      <a class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
         <img height="40px" width="150px" src="/css/logo.png">
       </a>
       <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
@@ -70,12 +70,30 @@
         <textarea name="description" id="description" class="form-control" required>{{.book.Description}}</textarea>
       </div>
       <div class="mb-3 mt-4">
-        <label for="isbn" class="form-label">ISBN:</label>
-        <input type="number" name="isbn" id="isbn" class="form-control" value="{{.book.ISBN}}" required>
+        <label for="tq" class="form-label">Total Quantity:</label>
+        <input type="number" name="total_quantity" id="tq" class="form-control" value="{{.book.TotalQuantity}}" required  onkeyup="copyValue()" min=0>
+      </div>
+      <div class="mb-3 mt-4">
+        <label for="aq" class="form-label">Available Quantity:</label>
+        <input type="number" name="actual_quantity" id="aq" class="form-control" value="{{.book.ActualQuantity}}" required readonly>
       </div>
       <button type="submit" class="btn btn-warning" id="btn">Submit</button>
     </form>
   </div>
 </div>
 </body>
+<script>
+
+  function copyValue() {
+    var val = {{.book.TotalQuantity}}
+    var val2 = {{.book.ActualQuantity}}
+    var input1Value = document.getElementById("tq").value;
+    change = input1Value - val
+    if(change <= 0){
+      document.getElementById("aq").value = 0
+    }else{
+      document.getElementById("aq").value = val2 + change;
+    }
+  }
+</script>
 </html>

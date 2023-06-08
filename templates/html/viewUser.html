@@ -7,13 +7,18 @@
     <script src="https://kit.fontawesome.com/b2a400ec90.js" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+    <style>
+        <!--
+        @import url("/css/search.css");
+        -->
+    </style>
 </head>
 <body>
 {{$user := .user}}
 <header class="p-3 text" style="background-color: black">
     <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+            <a class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
                 <img height="40px" width="150px" src="/css/logo.png">
             </a>
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
@@ -25,12 +30,24 @@
         </div>
     </div>
 </header>
-<form action="/search" method="POST">
-    <input type="text" id="searchInput" name="query" placeholder="Search Here"><br>
+<form action="/search" method="POST" autocomplete="off">
+    <div class="p-1 bg-dark rounded rounded-pill shadow-sm mt-4 mb-2 mx-auto" style="width: 50rem; ">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <button id="btn" type="button" class="btn btn-link text-warning"><i class="fa fa-search"></i></button>
+            </div>
+            <input type="search" placeholder="Search Here" class="form-control border-0 bg-dark text-light rounded rounded-pill placeholder-color" id="searchInput" name="query">
+        </div>
+    </div>
+    <div class="p-1 rounded rounded-pill shadow-sm mb-2 mx-auto text-center" style="width: 50rem; background-color: lightgrey ">
     Filter by Role:
     {{range .roles}}
-    <input type="checkbox" name="roles" id="roleFilter" value="{{.}}">{{.}}
+    <fieldset class="d-inline">
+        <input type="checkbox" name="roles" id="{{.}}" value="{{.}}">
+        <label for="{{.}}">{{.}}</label>
+    </fieldset>
     {{end}}
+    </div>
 </form><br><br>
 <div class="container-fluid">
     <div class="container">
@@ -63,16 +80,16 @@
                             </div>
                             <div class="mx-auto mt-10">
                                 {{if eq .RoleName "Member"}}
-                                    <div class="mb-2">
-                                        <a href="/borrowHistory/{{.UserID}}" class="btn btn-warning">View Borrow History</a>&nbsp;&nbsp;
-                                        <a href="/donateHistory/{{.UserID}}" class="btn btn-warning">View Donate History</a>
-                                    </div>
                                     {{if eq $user.RoleName "Admin"}}
                                         <a href="/makeLibrarian/{{.UserID}}" class="btn btn-warning">Make Librarian</a>
                                         <a href="/makeAdmin/{{.UserID}}" class="btn btn-warning">Make Admin</a>
+                                    {{else}}
+                                        <a href="/borrowHistory/{{.UserID}}" class="btn btn-warning">View Borrow History</a>
+                                        <a href="/donateHistory/{{.UserID}}" class="btn btn-warning">View Donate History</a>
                                     {{end}}
                                 {{else if eq .RoleName "Librarian"}}
                                     {{if eq $user.RoleName "Admin"}}
+                                        <a href="/removeLibrarian/{{.UserID}}" class="btn btn-warning">Remove Librarian</a>
                                         <a href="/makeAdmin/{{.UserID}}" class="btn btn-warning">Make Admin</a>
                                     {{end}}
                                 {{end}}
@@ -89,6 +106,52 @@
 </body>
 <script>
     $(document).ready(function() {
+        function Add(html, name, userName){
+            html += '<div class="col-xl-4 col-md-8 mb-3">';
+            html += '<div class="card mb-2 shadow-sm h-100">';
+            html += '<div class="card-body h-100">';
+            html += '<div class="card-text d-flex flex-column justify-content-between h-100">';
+            html += '<div class="">';
+            html += '<table>';
+            html += '<tr>';
+            html += '<td class="align-top col-4">UserID: </td>';
+            html += '<td class="col-8">' + name["user_id"] + '</td>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td class="align-top col-4">Name: </td>';
+            html += '<td class="col-8">' + name["name"] + '</td>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td class="align-top col-4">Email: </td>';
+            html += '<td class="col-8">' + name["email"] + '</td>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<td class="align-top col-4">Role: </td>';
+            html += '<td class="col-8">' + name["role_name"] + '</td>';
+            html += '</tr>';
+            html += '</table>';
+            html += '</div>';
+            html += '<div class="mx-auto mt-10">';
+            if (name["role_name"] == "Member") {
+                if(userName["role_name"]=="Admin"){
+                    html += '<a class="btn btn-warning me-1" href="/makeLibrarian/' + name["id"] + '">Make Librarian</a>';
+                    html += '<a class="btn btn-warning" href="/makeAdmin/' + name["id"] + '">Make Admin</a>';
+                }else{
+                    html += '<a class="btn btn-warning me-1" href="/borrowHistory/' + name["id"] + '">View Borrow History</a>';
+                    html += '<a class="btn btn-warning" href="/donateHistory/' + name["id"] + '">View Donate History</a>';
+                }
+            } else if (name["role_name"] == "Librarian") {
+                if(userName["role_name"]=="Admin"){
+                    html += '<a class="btn btn-warning" href="/makeAdmin/' + name["id"] + '">Make Admin</a>';
+                }
+            }
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            return html
+        }
         searchInput = $("#searchInput")
         searchInput.on('input' , async function(){
             var lower = searchInput.val()
@@ -103,29 +166,16 @@
             const dataUser = await user.json();
             console.log(await data);
             $("#card").empty()
+            var html = "";
             data.forEach(function (name) {
                 [dataUser].forEach(function(userName) {
-                    if (name["user_id"] != userName["user_id"]) {
-                        $("#card").append("UserID: " + "<span>" + name["user_id"] + "</span>" + "<br>" + "Name: " + "<span>" + name["name"] + "</span>" + "<br>" + "Email: " + "<span>" + name["email"] + "</span>" + "<br>" + "Role: " + "<span>" + name["role_name"] + "</span>" + "<br>" + "<br>")
-                        if (name["role_name"] == "Member") {
-                            $("#card").append("<a href='/borrowHistory/" + name["user_id"] + "'>" + "View Borrow History" + "</a>" + "&nbsp;" + "&nbsp;")
-                            $("#card").append("<a href='/donateHistory/" + name["user_id"] + "'>" + "View Donate History" + "</a>" + "<br>" + "<br>")
-                            $("#card").append("<a href='/makeLibrarian/" + name["user_id"] + "'>" + "Make Librarian" + "</a>" + "&nbsp;" + "&nbsp;")
-                            $("#card").append("<a href='/makeAdmin/" + name["user_id"] + "'>" + "Make Admin" + "</a>")
-                        } else if (name["role_name"] == "Librarian") {
-                            $("#card").append("<a href='/makeAdmin/" + name["user_id"] + "'>" + "Make Admin" + "<a>")
-                        }
-                        $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
+                    if(name["user_id"] != userName["user_id"]){
+                        html = Add(html, name, userName)
                     }
                 });
             });
-            $("#card").append("<a href='/home'>" + "Home" + "</a>")
-
+            $("#card").append(html)
         });
-    });
-</script>
-<script>
-    $(document).ready(function() {
         async function handleFilter() {
             var roles = [];
             $('input[name="roles"]:checked').each(function () {
@@ -141,24 +191,16 @@
                 success: function (result) {
                     var users = result;
                     $("#card").empty();
+                    var html = ""
                     for (var i = 0; i < users.length; i++) {
                         [dataUser].forEach(function(userName) {
                             var user = users[i];
                             if (user["user_id"] != userName["user_id"]) {
-                                $("#card").append("UserID: " + "<span>" + user["user_id"] + "</span>" + "<br>" + "Name: " + "<span>" + user["name"] + "</span>" + "<br>" + "Email: " + "<span>" + user["email"] + "</span>" + "<br>" + "Role: " + "<span>" + user["role_name"] + "</span>" + "<br>" + "<br>")
-                                if (user["role_name"] == "Member") {
-                                    $("#card").append("<a href='/borrowHistory/" + user["user_id"] + "'>" + "View Borrow History" + "</a>" + "&nbsp;" + "&nbsp;")
-                                    $("#card").append("<a href='/donateHistory/" + user["user_id"] + "'>" + "View Donate History" + "</a>" + "<br>" + "<br>")
-                                    $("#card").append("<a href='/makeLibrarian/" + user["user_id"] + "'>" + "Make Librarian" + "</a>" + "&nbsp;" + "&nbsp;")
-                                    $("#card").append("<a href='/makeAdmin/" + user["user_id"] + "'>" + "Make Admin" + "</a>")
-                                } else if (user["role_name"] == "Librarian") {
-                                    $("#card").append("<a href='/makeAdmin/" + user["user_id"] + "'>" + "Make Admin" + "<a>")
-                                }
-                                $("#card").append("<p>" + "-----------------------------------------------------------------" + "</p>")
+                                html = Add(html, user, userName)
                             }
                         });
                     };
-                    $("#card").append("<a href='/home'>" + "Home" + "</a>")
+                    $("#card").append(html)
                 },
                 error: function (error) {
                     console.log(error);
@@ -166,10 +208,8 @@
             });
         }
         $('input[name="roles"]').each(function () {
-            console.log("hi")
             $(this).on('change', handleFilter);
         });
     });
 </script>
-
 </html>
