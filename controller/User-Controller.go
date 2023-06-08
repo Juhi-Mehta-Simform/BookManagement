@@ -83,12 +83,12 @@ func MakeAdmin(ctx *gin.Context) {
 	}
 }
 
-func SearchUser(ctx *gin.Context) {
-	query := ctx.Query("query")
-	var users []models.User
-	DB.Model(&models.User{}).Where("name ILike ?", "%"+query+"%").Order("user_id").Find(&users)
-	ctx.JSON(http.StatusOK, users)
-}
+//func SearchUser(ctx *gin.Context) {
+//	query := ctx.Query("query")
+//	var users []models.User
+//	DB.Model(&models.User{}).Where("name ILike ?", "%"+query+"%").Order("user_id").Find(&users)
+//	ctx.JSON(http.StatusOK, users)
+//}
 
 func GetUser(ctx *gin.Context) {
 	session := sessions.Default(ctx)
@@ -147,16 +147,21 @@ func UpdateProfile(ctx *gin.Context) {
 	}
 }
 
-func FilterUser(ctx *gin.Context) {
+func SearchFilterUser(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	var users []models.User
+	var roleQuery string
+	var search string
 	if session.Get("userID") != nil {
 		role := ctx.Query("role_name")
+		query := ctx.Query("query")
 		if len(role) != 0 && role != "" {
-			DB.Model(&models.User{}).Where("role_name IN (?)", strings.Split(role, ",")).Order("user_id").Find(&users)
-		} else {
-			DB.Order("user_id").Find(&users)
+			tempRole := strings.Split(role, ",")
+			roleQuery = "role_name IN ('" + strings.Join(tempRole, "','") + "')"
+			search = " AND "
 		}
+		search += "name ILike " + "'%" + query + "%'"
+		DB.Model(&models.User{}).Where(roleQuery + search).Order("user_id").Find(&users)
 		ctx.JSON(http.StatusOK, users)
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")

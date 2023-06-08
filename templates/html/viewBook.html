@@ -40,7 +40,7 @@
             <div class="input-group-prepend">
                 <button id="btn" type="button" class="btn btn-link text-warning"><i class="fa fa-search"></i></button>
             </div>
-            <input type="text" placeholder="Search Here" class="form-control border-0 bg-dark rounded rounded-pill text-light placeholder-color"  id="searchInput" name="query" >
+            <input type="text" placeholder="Search Here...(title, isbn)" class="form-control border-0 bg-dark rounded rounded-pill text-light placeholder-color"  id="searchInput" name="query" >
         </div>
     </div>
     <div class="p-1 rounded rounded-pill shadow-sm mb-2 mx-auto text-center" style="width: 50rem; background-color: lightgrey ">
@@ -173,29 +173,11 @@
             html += '</div>';
             return html
         }
-        searchInput = $("#searchInput")
-        searchInput.on('input' , async function(){
-            var lower = searchInput.val()
-            const response = await fetch('http://localhost:8080/searchBook?query='+lower, {
-                method: "POST",
-            });
-            const user = await fetch('http://localhost:8080/fetch', {
-                method: "GET",
-            });
-            const data = await response.json();
-            const dataUser = await user.json();
-            $("#card").empty()
-            var html = "";
-            data.forEach(function (name) {
-                [dataUser].forEach(function(userName) {
-                   html = Add(html, name, userName)
-                });
-            });
-            $("#card").append(html)
-        });
+        searchInput = $("#searchInput");
         async function handleFilter() {
             var authors = [];
             var genres = [];
+            var query = searchInput.val()
             $('input[name="authors"]:checked').each(function () {
                 authors.push($(this).val());
             });
@@ -207,7 +189,7 @@
             });
             const dataUser = await user.json();
             $.ajax({
-                url: '/filterBook?authors='+authors+'&genres='+genres,
+                url: '/searchFilterBook?authors='+authors+'&genres='+genres+'&query='+query,
                 type: 'GET',
                 success: function (result) {
                     var books = result;
@@ -227,13 +209,12 @@
             });
         }
         $('input[name="authors"]' ).each(function () {
-            console.log("hi")
             $(this).on('change', handleFilter);
         });
         $('input[name="genres"]').each(function () {
-            console.log("hi")
             $(this).on('change', handleFilter);
         });
+        searchInput.on('input', handleFilter);
     });
 </script>
 </html>

@@ -296,26 +296,17 @@ func ReturnRequest(ctx *gin.Context) {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
 	}
 }
-func SearchBook(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	if session.Get("userID") != nil {
-		query := ctx.Query("query")
-		var books []models.Book
-		DB.Model(&models.Book{}).Where("title ILike ? OR isbn ILike ?", "%"+query+"%", "%"+query+"%").Order("id").Find(&books)
-		ctx.JSON(http.StatusOK, books)
-	} else {
-		ctx.Redirect(http.StatusMovedPermanently, "/")
-	}
-}
 
-func FilterBook(ctx *gin.Context) {
+func SearchFilterBook(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	var books []models.Book
 	var authorQuery string
 	var genreQuery string
+	var search string
 	if session.Get("userID") != nil {
 		genre := ctx.Query("genres")
 		author := ctx.Query("authors")
+		query := ctx.Query("query")
 		if len(author) != 0 && author != "" {
 			tempAuthor := strings.Split(author, ",")
 			authorQuery = "author IN ('" + strings.Join(tempAuthor, "','") + "')"
@@ -327,7 +318,11 @@ func FilterBook(ctx *gin.Context) {
 			tempGenre := strings.Split(genre, ",")
 			genreQuery += "genre IN ('" + strings.Join(tempGenre, "','") + "')"
 		}
-		DB.Model(&models.Book{}).Where(authorQuery + genreQuery).Order("id").Find(&books)
+		if (len(author) != 0 && author != "") || (len(genre) != 0 && genre != "") {
+			search = " AND "
+		}
+		search += "title ILike " + "'%" + query + "%'" + " OR " + "isbn ILike " + "'%" + query + "%'"
+		DB.Model(&models.Book{}).Where(authorQuery + genreQuery + search).Order("id").Find(&books)
 		ctx.JSON(http.StatusOK, books)
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")

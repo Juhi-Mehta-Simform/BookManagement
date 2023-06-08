@@ -154,30 +154,8 @@
             return html
         }
         searchInput = $("#searchInput")
-        searchInput.on('input' , async function(){
-            var lower = searchInput.val()
-            console.log(lower)
-            const response = await fetch('http://localhost:8080/search?query='+lower, {
-                method: "POST",
-            });
-            const user = await fetch('http://localhost:8080/fetch', {
-                method: "GET",
-            });
-            const data = await response.json();
-            const dataUser = await user.json();
-            console.log(await data);
-            $("#card").empty()
-            var html = "";
-            data.forEach(function (name) {
-                [dataUser].forEach(function(userName) {
-                    if(name["user_id"] != userName["user_id"]){
-                        html = Add(html, name, userName)
-                    }
-                });
-            });
-            $("#card").append(html)
-        });
         async function handleFilter() {
+            var query = searchInput.val()
             var roles = [];
             $('input[name="roles"]:checked').each(function () {
                 roles.push($(this).val());
@@ -187,7 +165,7 @@
             });
             const dataUser = await member.json();
             $.ajax({
-                url: '/filterUser?role_name='+roles,
+                url: '/searchFilterUser?role_name='+roles+'&query='+query,
                 type: 'GET',
                 success: function (result) {
                     var users = result;
@@ -211,6 +189,7 @@
         $('input[name="roles"]').each(function () {
             $(this).on('change', handleFilter);
         });
+        searchInput.on('input', handleFilter);
     });
 </script>
 </html>
