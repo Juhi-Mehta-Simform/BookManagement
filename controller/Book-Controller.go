@@ -173,8 +173,9 @@ func ViewBorrow(ctx *gin.Context) {
 	today := time.Now().Format("2006-01-02")
 	if session.Get("userID") != nil {
 		id := session.Get("userID").(int)
+		data := ctx.Query("query")
 		DB.Model(&models.User{}).Where("user_id = ?", id).Find(&user)
-		err := DB.Model(&models.Borrow{}).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, u.name, borrows.status, borrows.librarian_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn JOIN users AS u on borrows.member_id=u.user_id").Order("status, borrow_id").Find(&borrowList).Error
+		err := DB.Model(&models.Borrow{}).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, u.name, borrows.status, borrows.librarian_id, borrows.member_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn JOIN users AS u on borrows.member_id=u.user_id").Order("status, borrow_id").Find(&borrowList).Error
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
@@ -182,6 +183,7 @@ func ViewBorrow(ctx *gin.Context) {
 				"borrow": borrowList,
 				"user":   user,
 				"today":  today,
+				"error":  data,
 			})
 		}
 	} else {
@@ -193,7 +195,7 @@ func ViewRequest(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	var borrowList []models.BorrowBook
 	if session.Get("userID") != nil {
-		err := DB.Model(&models.Borrow{}).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.member_id, borrows.status, borrows.librarian_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn").Order("status, borrow_id").Find(&borrowList).Error
+		err := DB.Model(&models.Borrow{}).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.member_id, borrows.status, borrows.librarian_id, u.name").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn JOIN users AS u ON borrows.member_id = u.user_id").Order("status, borrow_id").Find(&borrowList).Error
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
@@ -230,12 +232,16 @@ func BorrowHistory(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	if session.Get("userID") != nil {
 		id := ctx.Param("user_id")
-		DB.Model(&models.Borrow{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.status, borrows.librarian_id, u.name").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn JOIN users AS u on borrows.member_id=u.user_id").Order("status, borrow_id").Find(&borrowList)
-		ctx.HTML(http.StatusOK, "viewBorrow.html", gin.H{
-			"member_id": id,
-			"borrow":    borrowList,
-			"today":     today,
-		})
+		db := DB.Model(&models.Borrow{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, borrows.book_isbn, borrows.issue_date, borrows.due_date, borrows.status, borrows.librarian_id, u.name, borrows.member_id").Joins("JOIN books AS b ON borrows.book_isbn = b.isbn JOIN users AS u on borrows.member_id=u.user_id").Order("status, borrow_id").Find(&borrowList)
+		if db.RowsAffected == 0 {
+			ctx.Redirect(http.StatusFound, "/viewUser?query=This user has no borrows.")
+		} else {
+			ctx.HTML(http.StatusOK, "viewBorrow.html", gin.H{
+				"member_id": id,
+				"borrow":    borrowList,
+				"today":     today,
+			})
+		}
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
 	}
@@ -291,7 +297,7 @@ func ReturnRequest(ctx *gin.Context) {
 		DB.Where("isbn=?", borrow.BookISBN).Find(&book)
 		newQuantity := book.ActualQuantity + 1
 		DB.Model(&models.Book{}).Where("isbn=?", borrow.BookISBN).Update("actual_quantity", newQuantity)
-		ctx.Redirect(http.StatusFound, "/userBorrow")
+		ctx.Redirect(http.StatusFound, "/viewRequest")
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
 	}
@@ -321,7 +327,7 @@ func SearchFilterBook(ctx *gin.Context) {
 		if (len(author) != 0 && author != "") || (len(genre) != 0 && genre != "") {
 			search = " AND "
 		}
-		search += "title ILike " + "'%" + query + "%'" + " OR " + "isbn ILike " + "'%" + query + "%'"
+		search += "(title ILike " + "'%" + query + "%'" + " OR " + "isbn ILike " + "'%" + query + "%')"
 		DB.Model(&models.Book{}).Where(authorQuery + genreQuery + search).Order("id").Find(&books)
 		ctx.JSON(http.StatusOK, books)
 	} else {
@@ -382,7 +388,7 @@ func UserDonate(ctx *gin.Context) {
 	if session.Get("userID") != nil {
 		id := session.Get("userID").(int)
 		DB.Model(&models.User{}).Where("user_id = ?", id).Find(&user)
-		DB.Model(&models.Donate{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity").Joins("JOIN books AS b ON donates.book_isbn = b.isbn").Order("donate_id").Scan(&donateList)
+		DB.Model(&models.Donate{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity, donates.member_id").Joins("JOIN books AS b ON donates.book_isbn = b.isbn").Order("donate_id").Scan(&donateList)
 		ctx.HTML(http.StatusOK, "viewDonate.html", gin.H{
 			"member_id": id,
 			"donate":    donateList,
@@ -400,7 +406,7 @@ func ViewDonate(ctx *gin.Context) {
 	if session.Get("userID") != nil {
 		id := session.Get("userID").(int)
 		DB.Model(&models.User{}).Where("user_id = ?", id).Find(&user)
-		err := DB.Model(&models.Donate{}).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity, u.name").Joins("JOIN books AS b ON donates.book_isbn = b.isbn JOIN users AS u on donates.member_id=u.user_id").Order("donate_id").Scan(&donateList).Error
+		err := DB.Model(&models.Donate{}).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity, u.name, donates.member_id").Joins("JOIN books AS b ON donates.book_isbn = b.isbn JOIN users AS u on donates.member_id=u.user_id").Order("donate_id").Scan(&donateList).Error
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, "not ok")
 		} else {
@@ -421,11 +427,15 @@ func DonateHistory(ctx *gin.Context) {
 	if session.Get("userID") != nil {
 		id := ctx.Param("user_id")
 		DB.Model(&models.User{}).Where("user_id = ?", id).Find(&user)
-		DB.Model(&models.Donate{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity, u.name").Joins("JOIN books AS b ON donates.book_isbn = b.isbn JOIN users AS u on donates.member_id=u.user_id").Order("donate_id").Scan(&donateList)
-		ctx.HTML(http.StatusOK, "viewDonate.html", gin.H{
-			"member_id": id,
-			"donate":    donateList,
-		})
+		db := DB.Model(&models.Donate{}).Where("member_id=?", id).Select("b.title, b.genre, b.author, donates.book_isbn, donates.donate_date, donates.quantity, u.name, donates.member_id").Joins("JOIN books AS b ON donates.book_isbn = b.isbn JOIN users AS u on donates.member_id=u.user_id").Order("donate_id").Scan(&donateList)
+		if db.RowsAffected == 0 {
+			ctx.Redirect(http.StatusFound, "/viewUser?query=This user has no donations.")
+		} else {
+			ctx.HTML(http.StatusOK, "viewDonate.html", gin.H{
+				"member_id": id,
+				"donate":    donateList,
+			})
+		}
 	} else {
 		ctx.Redirect(http.StatusMovedPermanently, "/")
 	}
@@ -437,8 +447,10 @@ func SendReminder(email string) error {
 		"yczvyrzalemzefif",
 		"smtp.gmail.com",
 	)
-	msg := fmt.Sprintf("Subject: Reminder for overdue book\r\n" +
-		"This is a reminder for overdue books. So please return it as soon as possible")
+	msg := fmt.Sprintf("From:juhi.mehta.0604@gmail.com\r\n"+
+		"To:%s\r\n"+
+		"Subject: Reminder for overdue book\r\n"+
+		"This is a reminder for overdue books. So please return it as soon as possible", email)
 	to := []string{email}
 	err := smtp.SendMail(
 		"smtp.gmail.com:587",
@@ -465,5 +477,5 @@ func Reminder(ctx *gin.Context) {
 	id := ctx.Param("member_id")
 	DB.Model(&models.User{}).Where("user_id", id).Select("email").Find(&email)
 	SendReminder(email)
-	ctx.Redirect(http.StatusFound, "/home")
+	ctx.Redirect(http.StatusFound, "/viewBorrow?query=Reminder Sent.")
 }

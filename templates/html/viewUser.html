@@ -15,6 +15,7 @@
 </head>
 <body>
 {{$user := .user}}
+{{$error := .error}}
 <header class="p-3 text" style="background-color: black">
     <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
@@ -52,6 +53,7 @@
 <div class="container-fluid">
     <div class="container">
         <div class="row justify-content-center" id="card">
+            <h3 class="text-center text-danger">{{$error}}</h3>
             {{range .users}}
             {{if ne .UserID $user.UserID}}
             <div class="col-xl-4 col-md-8 mb-3">
@@ -81,15 +83,15 @@
                             <div class="mx-auto mt-10">
                                 {{if eq .RoleName "Member"}}
                                     {{if eq $user.RoleName "Admin"}}
-                                        <a href="/makeLibrarian/{{.UserID}}" class="btn btn-warning mb-2">Make Librarian</a>
+                                        <a href="/makeLibrarian/{{.UserID}}" class="btn btn-warning">Make Librarian</a>
                                         <a href="/makeAdmin/{{.UserID}}" class="btn btn-warning">Make Admin</a>
                                     {{else}}
-                                        <a href="/borrowHistory/{{.UserID}}" class="btn btn-warning mb-2">View Borrow History</a>
+                                        <a href="/borrowHistory/{{.UserID}}" class="btn btn-warning">View Borrow History</a>
                                         <a href="/donateHistory/{{.UserID}}" class="btn btn-warning">View Donate History</a>
                                     {{end}}
                                 {{else if eq .RoleName "Librarian"}}
                                     {{if eq $user.RoleName "Admin"}}
-                                        <a href="/removeLibrarian/{{.UserID}}" class="btn btn-warning mb-2">Remove Librarian</a>
+                                        <a href="/removeLibrarian/{{.UserID}}" class="btn btn-warning">Remove Librarian</a>
                                         <a href="/makeAdmin/{{.UserID}}" class="btn btn-warning">Make Admin</a>
                                     {{end}}
                                 {{end}}
@@ -134,15 +136,15 @@
             html += '<div class="mx-auto mt-10">';
             if (name["role_name"] == "Member") {
                 if(userName["role_name"]=="Admin"){
-                    html += '<a class="btn btn-warning me-1 mb-2" href="/makeLibrarian/' + name["id"] + '">Make Librarian</a>';
+                    html += '<a class="btn btn-warning me-1" href="/makeLibrarian/' + name["id"] + '">Make Librarian</a>';
                     html += '<a class="btn btn-warning" href="/makeAdmin/' + name["id"] + '">Make Admin</a>';
                 }else{
-                    html += '<a class="btn btn-warning me-1 mb-2" href="/borrowHistory/' + name["id"] + '">View Borrow History</a>';
+                    html += '<a class="btn btn-warning me-1" href="/borrowHistory/' + name["id"] + '">View Borrow History</a>';
                     html += '<a class="btn btn-warning" href="/donateHistory/' + name["id"] + '">View Donate History</a>';
                 }
             } else if (name["role_name"] == "Librarian") {
                 if(userName["role_name"]=="Admin"){
-                    html += '<a class="btn btn-warning mb-2" href="/removeLibrarian/' + name["id"] + '">Remove Librarian</a>';
+                    html += '<a class="btn btn-warning" href="/removeLibrarian/' + name["id"] + '">Remove Librarian</a>';
                     html += '<a class="btn btn-warning" href="/makeAdmin/' + name["id"] + '">Make Admin</a>';
                 }
             }
@@ -169,17 +171,23 @@
                 type: 'GET',
                 success: function (result) {
                     var users = result;
-                    $("#card").empty();
-                    var html = ""
-                    for (var i = 0; i < users.length; i++) {
-                        [dataUser].forEach(function(userName) {
-                            var user = users[i];
-                            if (user["user_id"] != userName["user_id"]) {
-                                html = Add(html, user, userName)
-                            }
-                        });
-                    };
-                    $("#card").append(html)
+                    if(users.length!=0) {
+                        $("#card").empty();
+                        var html = ""
+                        for (var i = 0; i < users.length; i++) {
+                            [dataUser].forEach(function (userName) {
+                                var user = users[i];
+                                if (user["user_id"] != userName["user_id"]) {
+                                    html = Add(html, user, userName)
+                                }
+                            });
+                        }
+                        ;
+                        $("#card").append(html)
+                    }else{
+                        $("#card").empty();
+                        $("#card").append("<h3 class=\"text-center text-danger\">Records Not Found</h3>")
+                    }
                 },
                 error: function (error) {
                     console.log(error);

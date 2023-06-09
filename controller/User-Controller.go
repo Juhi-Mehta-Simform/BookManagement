@@ -33,6 +33,7 @@ func ViewUser(ctx *gin.Context) {
 	var Roles []string
 	if session.Get("userID") != nil {
 		UserId := session.Get("userID")
+		data := ctx.Query("query")
 		DB.Model(&models.User{}).Where("user_id = ?", UserId).Find(&user)
 		err := DB.Model(&models.User{}).Order("user_id").Find(&users).Error
 		DB.Model(&models.User{}).Distinct("role_name").Find(&Roles)
@@ -43,6 +44,7 @@ func ViewUser(ctx *gin.Context) {
 				"users": users,
 				"user":  user,
 				"roles": Roles,
+				"error": data,
 			})
 		}
 	} else {

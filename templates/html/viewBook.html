@@ -74,10 +74,6 @@
                                 <div class="">
                                 <table>
                                     <tr>
-                                        <td class="align-top col-4">ID: </td>
-                                        <td class="col-8">{{.ID}}</td>
-                                    </tr>
-                                    <tr>
                                         <td class="align-top col-4">Title: </td>
                                         <td class="col-8">{{.Title}}</td>
                                     </tr>
@@ -129,10 +125,6 @@
             html += '<div class="card-text d-flex flex-column justify-content-between h-100">';
             html += '<div class="">';
             html += '<table>';
-            html += '<tr>';
-            html += '<td class="align-top col-4">ID: </td>';
-            html += '<td class="col-8">' + name["id"] + '</td>';
-            html += '</tr>';
             html += '<tr>';
             html += '<td class="align-top col-4">Title: </td>';
             html += '<td class="col-8">' + name["title"] + '</td>';
@@ -193,15 +185,20 @@
                 type: 'GET',
                 success: function (result) {
                     var books = result;
-                    $("#card").empty();
-                    var html = ""
-                    for (var i = 0; i < books.length; i++) {
-                        [dataUser].forEach(function (userName) {
-                            var name = books[i];
-                            html = Add(html, name, userName)
-                        });
+                    if(books.length!=0) {
+                        $("#card").empty();
+                        var html = ""
+                        for (var i = 0; i < books.length; i++) {
+                            [dataUser].forEach(function (userName) {
+                                var name = books[i];
+                                html = Add(html, name, userName)
+                            });
+                        }
+                        $("#card").append(html)
+                    }else{
+                        $("#card").empty();
+                        $("#card").append("<h3 class=\"text-center text-danger\">Records Not Found</h3>")
                     }
-                    $("#card").append(html)
                 },
                 error: function (error) {
                     console.log(error);

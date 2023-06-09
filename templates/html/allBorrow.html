@@ -9,6 +9,7 @@
 </head>
 <body>
 {{$user := .user}}
+{{$error := .error}}
 <header class="p-3 text" style="background-color: black">
   <div class="container">
     <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
@@ -28,6 +29,7 @@
 <div class="container-fluid mt-2" id="card">
   <div class="container">
     <div class="row justify-content-center">
+      <h3 class="text-center text-danger">{{$error}}</h3>
       {{range .borrow}}
       {{if ne .Status "Returned"}}
       <div class="col-xl-4 col-md-8 mb-3">
